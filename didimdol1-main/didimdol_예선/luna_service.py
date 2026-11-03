@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 from openai import OpenAI
 from pydantic import BaseModel, Field
 from scoring import ABILITY_META
+from luna_coach_prompt import COACH_INSTRUCTIONS, build_coach_context
 
 class BranchEvent(BaseModel):
     title: str = Field(description="사용자에게 보여줄 짧은 상황 제목")
@@ -133,32 +134,18 @@ def chat_reply(
     revealed_events: List[Dict[str, str]],
     messages: List[Dict[str, str]],
 ) -> str:
-    transcript = "\n\n".join(
-        f"{'사용자' if m['role'] == 'user' else 'AI'}: {m['content']}" for m in messages[-12:]
-    )
-    event_text = "\n".join(
-        f"- {e['title']}: {e['situation']} / 현재 과제: {e['task']}" for e in revealed_events
-    ) or "- 아직 공개된 추가 상황 없음"
-    system = f"""
-당신은 ‘정답을 알려주는 튜터’가 아니라 사용자가 실전 문제를 해결할 때 사용하는 일반 목적 AI 어시스턴트입니다.
-
-{_mission_text(mission)}
-현재까지 공개된 파생 상황:
-{event_text}
-
-규칙:
-1. 사용자의 AI 활용 능력을 평가하거나 점수를 말하지 마세요.
-2. 높은 점수를 받는 법, 채점 기준, 모범 행동을 선제적으로 가르치지 마세요.
-3. 사용자가 세운 기준과 결정을 존중하고, 필요한 분석·비교·초안 작성을 도우세요.
-4. 사용자가 제공하지 않은 사실을 확정적으로 만들지 마세요.
-5. 가격·통계·운영시간·최신 사실 등 확인되지 않은 정보는 확실한 사실처럼 말하지 마세요.
-6. 최종 결정은 사용자 대신 단정하지 말고 선택 근거와 트레이드오프를 명확하게 제시하세요.
-7. 답변은 과도하게 길지 않게, 실제 협업 대화처럼 자연스러운 한국어로 작성하세요.
-""".strip()
+    # Luna Coach receives mission context and user conversation, NEVER the
+    # private grading template or evaluator instructions used by evaluate().
+    # Keep the exact API and function signature to preserve training.py behavior.
+    context = build_coach_context(_mission_text(mission), revealed_events)
+    chat_messages = [
+        {"role": m["role"], "content": m["content"]}
+        for m in messages[-12:]
+    ]
     response = _client(api_key).responses.create(
         model=model,
-        instructions=system,
-        input=[{"role": m["role"], "content": m["content"]} for m in messages[-12:]],
+        instructions=COACH_INSTRUCTIONS,
+        input=[{"role": "developer", "content": context}, *chat_messages],
         reasoning={"effort": "low"},
         max_output_tokens=2800,
         store=False,
