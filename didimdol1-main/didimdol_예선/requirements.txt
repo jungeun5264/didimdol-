@@ -1,0 +1,6 @@
+streamlit>=1.52,<2
+openai>=1.90,<3
+pydantic>=2.7,<3
+plotly>=5.20
+python-dotenv>=1.0
+psycopg[binary]>=3.2,<4

@@ -1,0 +1,51 @@
+/* 디딤돌 v8 · AI Practice Lab 디자인: 독립 훈련 영역 스타일 */
+.practice-hero{box-sizing:border-box;background:linear-gradient(112deg,#20264A,#34316C 59%,#5754A2);border-radius:24px;padding:42px 50px;margin:7px 0 30px;box-shadow:0 15px 36px rgba(38,38,98,.12);}
+.practice-hero .practice-eyebrow{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.13em;color:#DCD9FF!important;}
+.practice-hero .practice-hero-title{font-size:clamp(26px,3.4vw,38px)!important;font-weight:850;letter-spacing:-.05em;line-height:1.32;margin:13px 0 14px;color:#fff!important;}
+.practice-hero .practice-hero-copy{font-size:15px!important;line-height:1.75!important;max-width:660px;margin:0;color:#E9E8FF!important;word-break:keep-all;}
+.practice-heading{font-size:24px;font-weight:850;line-height:1.35;color:#243044!important;letter-spacing:-.04em;margin-bottom:6px;}
+/* 카드 배경·패딩은 native Streamlit container, 내용만 HTML: 좁은 열에서도 과도한 줄바꿈 금지 */
+div[class*="st-key-training_mission_"]{box-sizing:border-box;background:#fff!important;border:1px solid #E3E7F0!important;border-radius:18px!important;padding:23px!important;min-height:340px;box-shadow:0 8px 24px rgba(28,43,67,.048)!important;transition:box-shadow .15s ease,border-color .15s ease;}
+div[class*="st-key-training_mission_"]:hover{border-color:#C4BEF7!important;box-shadow:0 14px 27px rgba(45,42,98,.09)!important;}
+.mission-content{min-height:248px;width:100%;display:flex;flex-direction:column;box-sizing:border-box;}
+.mission-topline{display:flex;align-items:center;gap:11px;margin-bottom:19px;flex-wrap:wrap;}
+.mission-number{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:#EEECFF;color:#6258E8!important;font-weight:850;font-size:14px;flex-shrink:0;}
+.mission-category{font-size:12px;font-weight:750;color:#7768D6!important;white-space:normal;}
+.mission-title{font-size:20px!important;font-weight:850;color:#1C2840!important;line-height:1.38!important;letter-spacing:-.035em;margin:0 0 12px!important;min-height:55px;word-break:keep-all;}
+.mission-summary{font-size:13.5px!important;line-height:1.7!important;color:#667184!important;margin:0!important;word-break:keep-all;}
+.mission-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:18px;}
+.mission-meta span{background:#F4F5F9;border-radius:30px;padding:5px 10px;font-size:11px;color:#606A7F!important;white-space:nowrap;}
+div[class*="st-key-training_mission_"] div.stButton>button[kind="primary"]{background:#6258E8!important;border-color:#6258E8!important;color:white!important;min-height:46px!important;width:100%;border-radius:10px!important;}
+div[class*="st-key-training_mission_"] div.stButton>button[kind="primary"] *{color:white!important;}
+div[class*="st-key-training_mission_"] div.stButton>button[kind="primary"]:hover{background:#5148D3!important;border-color:#5148D3!important;}
+.brand{display:flex;align-items:center;gap:11px;margin:3px 0 23px;}
+.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#6258E8;color:#fff!important;font-size:19px;font-weight:800;}
+.brand-name{font-weight:850;color:#1C2840!important;font-size:20px;letter-spacing:-.035em;}
+.detail-title{font-size:30px!important;font-weight:850;letter-spacing:-.04em;line-height:1.3;color:#212B43!important;}
+.detail-summary{font-size:15px;color:#667184!important;line-height:1.8;margin-top:12px;}
+.info-panel{background:#F3F5FC;border-radius:14px;border:1px solid #E8EAF4;padding:20px 22px;font-size:15px;line-height:1.85;color:#28364A;}
+.goal-row{display:flex;align-items:flex-start;gap:10px;margin:12px 0;color:#29394A;line-height:1.65;}
+.goal-no{background:#ECEAFF;color:#6258E8;display:grid;place-items:center;border-radius:9px;width:25px;height:25px;flex-shrink:0;font-size:12px;font-weight:800;}
+.workspace-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:15px;}
+.workspace-title{font-size:25px;font-weight:850;color:#1D2940;letter-spacing:-.03em;}
+.phase-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+.phase{background:#EDEEF5;color:#697386!important;padding:6px 10px;border-radius:40px;font-size:12px;}
+.phase-on{background:#EDEAFF;color:#6258E8!important;font-weight:750;}
+.panel-title{color:#364157;font-weight:800;font-size:15px;margin:8px 0 12px;}
+.branch-card{background:#F6F4FF;border:1px solid #D7D1FC;border-radius:16px;padding:18px;margin:12px 0;}
+.branch-kicker{font-size:11px;letter-spacing:.1em;font-weight:800;color:#6258E8!important;}
+.branch-title{font-size:17px;font-weight:850;color:#26324D!important;margin:6px 0;}
+.branch-copy{font-size:13.5px;line-height:1.7;color:#5E6680!important;}
+.progress-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.progress-pill{background:#EDF0F5;color:#606B7D!important;border-radius:40px;font-size:12px;padding:6px 12px;}
+.section-title{font-size:25px;font-weight:850;color:#202C43;letter-spacing:-.035em;margin:8px 0 5px;}
+.section-copy{font-size:14px;color:#647084!important;margin-bottom:20px;}
+.result-score{font-size:68px;font-weight:900;letter-spacing:-.08em;color:#202C43;line-height:1.1;}
+.result-sub{color:#7B8497;font-size:14px;margin-top:6px;}
+.feedback-card{background:white;border:1px solid #E4E8F0;border-radius:16px;padding:19px;min-height:175px;}
+.feedback-label{font-size:11px;font-weight:800;color:#6258E8!important;letter-spacing:.08em;}
+.feedback-title{font-size:17px;color:#202C43!important;font-weight:800;margin:8px 0 9px;}
+.small-muted{font-size:13px;color:#5D687C!important;line-height:1.65;}
+[data-testid="stChatMessage"]{background:white!important;border:1px solid #E5E8F0!important;border-radius:14px!important;padding:11px 14px!important;}
+@media(max-width:960px){.practice-hero{padding:32px;}.mission-title{font-size:18px!important;}}
+@media(max-width:768px){.practice-hero{padding:26px 22px;border-radius:18px;}.practice-hero .practice-hero-title{font-size:28px!important;}.mission-content{min-height:0;}.mission-title{min-height:0;}div[class*="st-key-training_mission_"]{min-height:0;}}

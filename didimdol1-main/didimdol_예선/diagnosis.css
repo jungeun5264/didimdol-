@@ -1,0 +1,51 @@
+/* 사전진단 페이지 전용 스타일 (공통 토큰·헤더는 style.css) */
+:root { --sub-text: #9b6e6e; --info-bg: #d4f7df; }
+
+.diag {
+  min-height: 904px;
+  background: var(--green);
+  padding: 256px 24px 144px;
+  text-align: center;
+}
+.diag__title { font-size: 56px; font-weight: 800; color: var(--white); line-height: 1.2; letter-spacing: -0.02em; }
+.diag__sub { margin-top: 25px; font-size: 18px; line-height: 24px; color: var(--sub-text); }
+
+/* 안내 박스 */
+.diag__info {
+  max-width: 737px; margin: 33px auto 0;
+  min-height: 111px;
+  display: grid; grid-template-columns: 384fr 353fr;
+  background: var(--info-bg);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  padding: 15px 0;
+}
+.diag__info-cell {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 20px;
+  font-size: 14px; line-height: 1.4; color: #555;
+}
+.diag__info-cell + .diag__info-cell { border-left: 1px solid #8fb39d; }
+
+/* 시작 버튼 */
+.diag__action { max-width: 1200px; margin: 125px auto 0; display: flex; justify-content: flex-end; }
+.btn-start {
+  display: inline-flex; align-items: center; justify-content: center; gap: 18px;
+  width: 315px; height: 95px;
+  background: var(--white); color: var(--green-dark);
+  font-size: 24px; font-weight: 300;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.btn-start:hover { transform: translateY(-2px); }
+
+@media (max-width: 768px) {
+  .diag { min-height: 0; padding: 100px 20px 100px; }
+  .diag__title { font-size: 32px; }
+  .diag__sub { font-size: 15px; }
+  .diag__info { grid-template-columns: 1fr; padding: 0; }
+  .diag__info-cell { padding: 20px; }
+  .diag__info-cell + .diag__info-cell { border-left: 0; border-top: 1px solid #8fb39d; }
+  .diag__action { margin-top: 56px; justify-content: center; }
+  .btn-start { width: 100%; max-width: 315px; height: 72px; font-size: 20px; }
+}

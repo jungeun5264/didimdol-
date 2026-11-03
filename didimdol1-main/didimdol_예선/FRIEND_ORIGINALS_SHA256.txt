@@ -1,0 +1,6 @@
+The original four Figma-exported files are preserved byte-for-byte.
+
+index.html: 4d8fe15b8c79321f4f608da1c66b67cd58c9a06f3d6a2c801a6d537b7b081764
+diagnosis.html: 2053809cadce6b3a1009c803f63e5d7049ea6c2781f01b584aebf08d145cc5d1
+style.css: a6dbae2836427f5db1afc2ff86df1f7dbb86e654eaa47cf38261da0cf7aab9b5
+diagnosis.css: 6263118e9138e17d0c2926c79363b4fc79707d9176f68304738f797e274e075f
