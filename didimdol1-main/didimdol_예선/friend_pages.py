@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parent
-ROUTES = ('home','diagnosis','diagnosis-live','training','prompt-info','mypage','login','signup')
+ROUTES = ('home','diagnosis','diagnosis-live','training','prompt-info','mypage','login','signup','community')
 
 
 def original_fragment(name: str) -> str:
@@ -25,6 +25,9 @@ def original_fragment(name: str) -> str:
     for label, route in (('맞춤형 심화 교육','training'),('Prompt Coach','prompt-info'),('마이페이지','mypage')):
         body = body.replace(f'<a href="#">{label}</a>',
                             f'<a href="?view={route}" data-didimdol-route="{route}" target="_self">{label}</a>')
+    # 원본 HTML 파일은 건드리지 않고 렌더링 과정에서 커뮤니티 메뉴만 추가합니다.
+    body = body.replace('</nav>',
+                        '<a href="?view=community" data-didimdol-route="community" target="_self">커뮤니티</a></nav>', 1)
     body = body.replace('<a href="#" class="btn-white">회원가입하기</a>',
                         '<a href="?view=login" data-didimdol-route="login" target="_self" class="btn-white">회원가입하기</a>')
     body = body.replace('<a href="#" class="btn-start">',

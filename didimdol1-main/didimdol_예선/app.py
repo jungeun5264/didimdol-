@@ -26,9 +26,9 @@ def go(view: str) -> None:
 
 
 def header():
-    cols = st.columns([1.55, .60, .90, 1.34, .93, .83, .82], gap='small', vertical_alignment='center')
+    cols = st.columns([1.40, .55, .83, 1.29, .83, .87, .80, .80], gap='small', vertical_alignment='center')
     items = [('디딤돌','home'), ('홈','home'), ('사전진단','diagnosis'),
-             ('맞춤형 심화 교육','training'), ('Prompt Coach','prompt-info'),
+             ('맞춤형 심화 교육','training'), ('커뮤니티','community'), ('Prompt Coach','prompt-info'),
              ('마이페이지','mypage'), ('로그아웃' if auth.current_user() else '로그인',
                                      'logout' if auth.current_user() else 'login')]
     for i, (c, (label, route)) in enumerate(zip(cols, items)):
@@ -50,7 +50,7 @@ def hidden_route_buttons():
          pointer-events:none!important;}</style>''')
     with st.container(key='didimdol_router_controls'):
         for view in ('home', 'diagnosis', 'diagnosis-live', 'training', 'prompt-info',
-                     'mypage', 'login', 'signup', 'onboarding'):
+                     'mypage', 'login', 'signup', 'onboarding', 'community'):
             if st.button('route', key='route_' + view):
                 go(view)
 
@@ -69,12 +69,12 @@ def pending(title, body):
 
 
 view = st.query_params.get('view') or st.session_state.get('current_view', 'home')
-allowed = {'home', 'diagnosis', 'diagnosis-live', 'training', 'prompt-info', 'mypage', 'login', 'signup', 'onboarding'}
+allowed = {'home', 'diagnosis', 'diagnosis-live', 'training', 'prompt-info', 'mypage', 'login', 'signup', 'onboarding', 'community'}
 if view not in allowed:
     view = 'home'
 st.session_state['current_view'] = view
 
-if view in ('diagnosis-live', 'training', 'mypage', 'onboarding') and not auth.current_user():
+if view in ('diagnosis-live', 'training', 'mypage', 'onboarding', 'community') and not auth.current_user():
     st.session_state['post_login_view'] = view
     go('login')
 
@@ -103,6 +103,9 @@ else:
         import test
         test.render()
         auth.persist_diagnosis_if_complete()
+    elif view == 'community':
+        import community
+        community.render(go)
     elif view == 'training':
         import training
         training.render_training()
