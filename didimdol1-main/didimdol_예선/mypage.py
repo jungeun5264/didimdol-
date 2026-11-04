@@ -87,39 +87,54 @@ def render(navigate):
 
 
 def _render_type_tab(navigate, user):
-    from user_types import TYPES, SURVEY_VERSION
-    profile = store.load_type_profile(user['user_id'])
+    """2025 Q26 LPA 6유형: 기존 5점 설문과 구분하여 표시."""
+    from user_types import TYPES, AREAS
+    profile = store.load_lpa_profile(user['user_id'])
     if st.session_state.pop('type_survey_just_completed', False):
-        st.success('12문항 설문이 저장되었습니다. 나의 활용 유형을 확인해보세요.')
+        st.success('12문항 자기평가가 저장되었습니다. 새 LPA 유형 분석 결과를 확인해보세요.')
     if not profile:
-        st.markdown('### 아직 활용 유형 설문을 완료하지 않았어요')
-        st.caption('기존 가입자의 진단·훈련 기록에는 영향을 주지 않습니다. 설문은 원할 때 참여할 수 있어요.')
-        if st.button('12문항 설문 시작하기', key='my_start_survey', type='primary'):
+        legacy = store.load_type_profile(user['user_id'])
+        if legacy:
+            from legacy_user_types import TYPES as LEGACY_TYPES
+            old = LEGACY_TYPES.get(legacy['primary_type'])
+            st.warning('이전 버전의 5점 척도 설문 결과가 있습니다. 새 4점 Q26-LPA 분류와 비교하거나 자동 변환하지 않습니다.')
+            if old:
+                st.markdown(f'이전 설문 결과: **{old.name}**')
+        else:
+            st.markdown('### 아직 Q26 기반 AI 활용 유형 설문을 완료하지 않았어요')
+            st.caption('기존 회원의 진단·훈련 기록에는 영향을 주지 않습니다.')
+        if st.button('새 12문항 설문 시작하기', key='my_start_lpa', type='primary'):
             navigate('onboarding')
         return
-    dominant = TYPES.get(profile['primary_type'])
-    if not dominant:
-        st.warning('알 수 없는 유형이 저장되어 있습니다. 설문을 다시 진행해주세요.')
-        if st.button('설문 다시 하기', key='my_retake_unknown'):
-            navigate('onboarding')
+
+    primary = TYPES.get(profile['primary_type'])
+    if not primary:
+        st.error('저장된 유형을 해석할 수 없습니다. 데이터 관리자에게 문의해주세요.')
         return
+
     st.markdown('### 나의 AI 활용 유형')
-    st.caption('12문항 자기보고식 설문에 기반한 **탐색적 경향**이며, AI 활용 능력의 우열을 뜻하지 않습니다.')
+    st.caption('2025 디지털정보격차 실태조사 Q26의 4개 자기평가 영역에 기반한 LPA 모형의 사후확률 추론 결과입니다. 객관적 AI 수행 점수나 정답 확률이 아닙니다.')
     with st.container(border=True):
-        st.markdown(f'#### {dominant.name}')
-        st.write(dominant.description)
-        st.info(dominant.tip)
+        st.markdown(f'#### {primary.name} ({profile["primary_type"]})')
+        st.write(primary.description)
+        st.info(primary.tip)
+        st.metric('추천 유형의 사후확률', f'{profile["primary_probability"] * 100:.1f}%')
+        runner_info = TYPES[profile['runner_up_type']]
+        st.caption(f'두 번째로 가능성이 높은 유형: {runner_info.name} · {profile["runner_up_probability"] * 100:.1f}%')
         if profile['is_close']:
-            st.caption('상위 유형 간 점수 차가 1점 이하이므로 하나의 유형으로 단정하기 어렵습니다. 다른 유형의 특성도 참고해주세요.')
-        if len(profile['tied_types']) > 1:
-            other = ', '.join(TYPES[key].name for key in profile['tied_types'] if key != profile['primary_type'] and key in TYPES)
-            if other:
-                st.caption(f'같은 최고 점수를 받은 유형: {other}')
-    st.markdown('#### 유형별 응답 경향')
-    for type_id, info in TYPES.items():
-        points = int(profile['scores'].get(type_id, 0))
-        st.progress(points / 10, text=f'{info.name} · {points}/10')
-    st.caption(f"설문 버전: {profile['survey_version']} · 최근 완료: {profile['updated_at']} · 기존 사전진단 6개 역량과 별개")
+            st.warning('상위 두 유형의 사후확률 차이가 10%p 미만입니다. 두 유형의 설명을 함께 참고하세요. 이 기준은 화면 안내용 임시 정책입니다.')
+
+    st.markdown('#### 네 가지 자기평가 영역')
+    for name, mean in zip(AREAS, profile['four_means']):
+        st.progress(min(1.0, max(0., mean / 4)), text=f'{name}: {mean:.2f} / 4.00')
+    st.caption('각 영역은 세 문항 평균이며, 분류에는 반올림하지 않은 1~4점 원점수를 사용했습니다.')
+
+    st.markdown('#### 여섯 유형의 사후확률')
+    for code, info in TYPES.items():
+        prob = profile['posterior_probabilities'].get(code, 0.0)
+        st.progress(min(1.0, max(0.0, prob)), text=f'{info.name}: {prob * 100:.1f}%')
+    st.caption('사후확률 합계는 100%입니다. 기존 조사에서 추정된 혼합비율(pi)이나 실제 수행능력의 정확도와 동일한 값이 아닙니다.')
+    st.caption(f'모형: {profile["model_id"]} · 설문: {profile["survey_version"]} · 최근 완료: {profile["updated_at"]}')
     if st.button('12문항 설문 다시 하기', key='my_retake_survey'):
         navigate('onboarding')
 

@@ -84,6 +84,17 @@ def initialize():
             tied_types_json TEXT NOT NULL,
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''')
+        # 이전 5점 성향 설문은 보존하고 새 4점 LPA 결과는 별도 테이블에 저장.
+        _execute(conn, '''CREATE TABLE IF NOT EXISTS lpa_type_profiles (
+            user_id TEXT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+            survey_version TEXT NOT NULL,
+            model_id TEXT NOT NULL,
+            primary_type TEXT NOT NULL,
+            answers_json TEXT NOT NULL,
+            means_json TEXT NOT NULL,
+            posteriors_json TEXT NOT NULL,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''')
         _execute(conn, '''CREATE TABLE IF NOT EXISTS training_attempts (
             user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
             mission_id TEXT NOT NULL,
@@ -169,7 +180,7 @@ def needs_onboarding(user_id):
 
 def save_type_profile(user_id, answers, result):
     """설문 결과 저장과 필수 설문 해제를 원자적으로 처리합니다."""
-    from user_types import classify
+    from legacy_user_types import classify
     verified = classify(answers)
     if result != verified:
         raise ValueError('응답과 분류 결과가 일치하지 않습니다.')
@@ -211,4 +222,51 @@ def load_type_profile(user_id):
         'updated_at': str(row['updated_at']),
     }
 
-    
+def save_lpa_profile(user_id, answers):
+    """Q26 LPA 결과 저장 + 신규 가입 필수설문 해제 (한 트랜잭션).
+
+    사전진단·훈련 및 종전 5점 탐색적 설문 테이블은 변경하지 않습니다.
+    """
+    from user_types import classify
+    result = classify(answers)
+    with connect() as conn:
+        _execute(conn, '''INSERT INTO lpa_type_profiles
+            (user_id,survey_version,model_id,primary_type,answers_json,means_json,posteriors_json)
+            VALUES (?,?,?,?,?,?,?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                survey_version=excluded.survey_version, model_id=excluded.model_id,
+                primary_type=excluded.primary_type, answers_json=excluded.answers_json,
+                means_json=excluded.means_json, posteriors_json=excluded.posteriors_json,
+                updated_at=CURRENT_TIMESTAMP''',
+            (user_id, result['survey_version'], result['model_id'], result['primary_type'],
+             json.dumps(answers, ensure_ascii=False),
+             json.dumps(result['four_means']),
+             json.dumps(result['posterior_probabilities'])))
+        _execute(conn, 'DELETE FROM onboarding_pending WHERE user_id=?', (user_id,))
+    return result
+
+
+def load_lpa_profile(user_id):
+    with connect() as conn:
+        row = _execute(conn, '''SELECT survey_version, model_id, primary_type, answers_json,
+                              means_json, posteriors_json, updated_at
+                              FROM lpa_type_profiles WHERE user_id=?''', (user_id,)).fetchone()
+    if row is None:
+        return None
+    posterior = json.loads(row['posteriors_json'])
+    ranked = sorted(posterior, key=lambda key: (-posterior[key], key))
+    margin = posterior[ranked[0]] - posterior[ranked[1]]
+    return {
+        'survey_version': row['survey_version'],
+        'model_id': row['model_id'],
+        'primary_type': row['primary_type'],
+        'answers': json.loads(row['answers_json']),
+        'four_means': json.loads(row['means_json']),
+        'posterior_probabilities': posterior,
+        'primary_probability': posterior[ranked[0]],
+        'runner_up_type': ranked[1],
+        'runner_up_probability': posterior[ranked[1]],
+        'margin': margin,
+        'is_close': margin < 0.10,
+        'updated_at': str(row['updated_at']),
+    }
