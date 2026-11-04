@@ -175,7 +175,19 @@ def save_type_profile(user_id, answers, result):
         raise ValueError('응답과 분류 결과가 일치하지 않습니다.')
     with connect() as conn:
         _execute(conn, '''INSERT INTO user_type_profiles
-                    json.dumps(verified['tied_types'], ensure_ascii=False)))
+            (user_id,survey_version,primary_type,answers_json,scores_json,tied_types_json)
+            VALUES (?,?,?,?,?,?)
+            ON CONFLICT(user_id) DO UPDATE SET
+            survey_version=excluded.survey_version,
+            primary_type=excluded.primary_type,
+            answers_json=excluded.answers_json,
+            scores_json=excluded.scores_json,
+            tied_types_json=excluded.tied_types_json,
+            updated_at=CURRENT_TIMESTAMP''',
+                 (user_id, verified['survey_version'], verified['primary_type'],
+                  json.dumps(answers, ensure_ascii=False),
+                  json.dumps(verified['scores'], ensure_ascii=False),
+                  json.dumps(verified['tied_types'], ensure_ascii=False)))
         _execute(conn, 'DELETE FROM onboarding_pending WHERE user_id=?', (user_id,))
 
 
@@ -198,16 +210,5 @@ def load_type_profile(user_id):
         'is_close': ordered[0] - ordered[1] <= 1,
         'updated_at': str(row['updated_at']),
     }
-      (user_id,survey_version,primary_type,answers_json,scores_json,tied_types_json)
-            VALUES (?,?,?,?,?,?)
-            ON CONFLICT(user_id) DO UPDATE SET
-            survey_version=excluded.survey_version,
-            primary_type=excluded.primary_type,
-            answers_json=excluded.answers_json,
-            scores_json=excluded.scores_json,
-            tied_types_json=excluded.tied_types_json,
-            updated_at=CURRENT_TIMESTAMP''',
-                 (user_id, verified['survey_version'], verified['primary_type'],
-                  json.dumps(answers, ensure_ascii=False),
-                  json.dumps(verified['scores'], ensure_ascii=False),
+
     
