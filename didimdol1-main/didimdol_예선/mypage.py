@@ -78,6 +78,54 @@ def render(navigate):
       </section>
     ''', unsafe_allow_html=True)
 
+    tab_type, tab_growth = st.tabs(['나의 AI 활용 유형', '나의 역량 성장'])
+    with tab_type:
+        _render_type_tab(navigate, user)
+    with tab_growth:
+        _render_growth_section(navigate, user, diagnosis, trainings,
+                               total_attempts, unique_missions, score)
+
+
+def _render_type_tab(navigate, user):
+    from user_types import TYPES, SURVEY_VERSION
+    profile = store.load_type_profile(user['user_id'])
+    if st.session_state.pop('type_survey_just_completed', False):
+        st.success('12문항 설문이 저장되었습니다. 나의 활용 유형을 확인해보세요.')
+    if not profile:
+        st.markdown('### 아직 활용 유형 설문을 완료하지 않았어요')
+        st.caption('기존 가입자의 진단·훈련 기록에는 영향을 주지 않습니다. 설문은 원할 때 참여할 수 있어요.')
+        if st.button('12문항 설문 시작하기', key='my_start_survey', type='primary'):
+            navigate('onboarding')
+        return
+    dominant = TYPES.get(profile['primary_type'])
+    if not dominant:
+        st.warning('알 수 없는 유형이 저장되어 있습니다. 설문을 다시 진행해주세요.')
+        if st.button('설문 다시 하기', key='my_retake_unknown'):
+            navigate('onboarding')
+        return
+    st.markdown('### 나의 AI 활용 유형')
+    st.caption('12문항 자기보고식 설문에 기반한 **탐색적 경향**이며, AI 활용 능력의 우열을 뜻하지 않습니다.')
+    with st.container(border=True):
+        st.markdown(f'#### {dominant.name}')
+        st.write(dominant.description)
+        st.info(dominant.tip)
+        if profile['is_close']:
+            st.caption('상위 유형 간 점수 차가 1점 이하이므로 하나의 유형으로 단정하기 어렵습니다. 다른 유형의 특성도 참고해주세요.')
+        if len(profile['tied_types']) > 1:
+            other = ', '.join(TYPES[key].name for key in profile['tied_types'] if key != profile['primary_type'] and key in TYPES)
+            if other:
+                st.caption(f'같은 최고 점수를 받은 유형: {other}')
+    st.markdown('#### 유형별 응답 경향')
+    for type_id, info in TYPES.items():
+        points = int(profile['scores'].get(type_id, 0))
+        st.progress(points / 10, text=f'{info.name} · {points}/10')
+    st.caption(f"설문 버전: {profile['survey_version']} · 최근 완료: {profile['updated_at']} · 기존 사전진단 6개 역량과 별개")
+    if st.button('12문항 설문 다시 하기', key='my_retake_survey'):
+        navigate('onboarding')
+
+
+def _render_growth_section(navigate, user, diagnosis, trainings,
+                           total_attempts, unique_missions, score):
     c1,c2,c3,c4 = st.columns(4, gap='medium')
     data = [
         ('사전진단', '완료' if diagnosis else '미완료', '7개 상황 · 6개 역량'),
