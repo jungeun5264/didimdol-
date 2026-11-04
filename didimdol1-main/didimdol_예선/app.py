@@ -50,7 +50,7 @@ def hidden_route_buttons():
          pointer-events:none!important;}</style>''')
     with st.container(key='didimdol_router_controls'):
         for view in ('home', 'diagnosis', 'diagnosis-live', 'training', 'prompt-info',
-                     'mypage', 'login', 'signup'):
+                     'mypage', 'login', 'signup', 'onboarding'):
             if st.button('route', key='route_' + view):
                 go(view)
 
@@ -69,14 +69,20 @@ def pending(title, body):
 
 
 view = st.query_params.get('view') or st.session_state.get('current_view', 'home')
-allowed = {'home', 'diagnosis', 'diagnosis-live', 'training', 'prompt-info', 'mypage', 'login', 'signup'}
+allowed = {'home', 'diagnosis', 'diagnosis-live', 'training', 'prompt-info', 'mypage', 'login', 'signup', 'onboarding'}
 if view not in allowed:
     view = 'home'
 st.session_state['current_view'] = view
 
-if view in ('diagnosis-live', 'training', 'mypage') and not auth.current_user():
+if view in ('diagnosis-live', 'training', 'mypage', 'onboarding') and not auth.current_user():
     st.session_state['post_login_view'] = view
     go('login')
+
+# 새 계정은 가입 직후 설문이 완료될 때까지 다른 페이지로 이동하지 않습니다.
+# 기존 계정은 onboarding_pending에 등록되지 않으므로 기존 이용 흐름을 유지합니다.
+user = auth.current_user()
+if user and view != 'onboarding' and store.needs_onboarding(user['user_id']):
+    go('onboarding')
 
 if view in ('home', 'diagnosis'):
     hidden_route_buttons()
@@ -90,6 +96,9 @@ else:
         auth.render_auth(view, go)
     elif view == 'mypage':
         mypage()
+    elif view == 'onboarding':
+        import onboarding
+        onboarding.render(go)
     elif view == 'diagnosis-live':
         import test
         test.render()
