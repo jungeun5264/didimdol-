@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parent
-ROUTES = ('home','diagnosis','diagnosis-live','training','prompt-info','mypage','login','signup','community')
+ROUTES = ('home', 'diagnosis', 'diagnosis-live', 'training', 'mypage', 'login', 'signup', 'community')
 
 
 def original_fragment(name: str) -> str:
@@ -18,21 +18,38 @@ def original_fragment(name: str) -> str:
     if not match:
         raise ValueError('body 요소가 없습니다.')
     body = match.group(1)
-    # 화면에 보여주는 HTML에서만 링크 연결. 원본 4개 파일 바이트 불변.
-    for path, target in (('index.html','home'),('diagnosis.html','diagnosis')):
-        body = body.replace(f'href="{path}"',
-                            f'href="?view={target}" data-didimdol-route="{target}" target="_self"')
-    for label, route in (('맞춤형 심화 교육','training'),('Prompt Coach','prompt-info'),('마이페이지','mypage')):
-        body = body.replace(f'<a href="#">{label}</a>',
-                            f'<a href="?view={route}" data-didimdol-route="{route}" target="_self">{label}</a>')
-    # 원본 HTML 파일은 건드리지 않고 렌더링 과정에서 커뮤니티 메뉴만 추가합니다.
-    body = body.replace('</nav>',
-                        '<a href="?view=community" data-didimdol-route="community" target="_self">커뮤니티</a></nav>', 1)
-    body = body.replace('<a href="#" class="btn-white">회원가입하기</a>',
-                        '<a href="?view=login" data-didimdol-route="login" target="_self" class="btn-white">회원가입하기</a>')
-    body = body.replace('<a href="#" class="btn-start">',
-                        '<a href="?view=diagnosis-live" data-didimdol-route="diagnosis-live" target="_self" class="btn-start">')
-    # 안내 텍스트는 표시할 때만 실제 test.py의 7개 상황에 맞춤
+
+    for path, target in (('index.html', 'home'), ('diagnosis.html', 'diagnosis')):
+        body = body.replace(
+            f'href="{path}"',
+            f'href="?view={target}" data-didimdol-route="{target}" target="_self"'
+        )
+    for label, route in (('맞춤형 심화 교육', 'training'), ('마이페이지', 'mypage')):
+        body = body.replace(
+            f'<a href="#">{label}</a>',
+            f'<a href="?view={route}" data-didimdol-route="{route}" target="_self">{label}</a>'
+        )
+
+    body = body.replace('<a href="#">Prompt Coach</a>', '')
+    body = body.replace(
+        '</nav>',
+        '<a href="?view=community" data-didimdol-route="community" target="_self">커뮤니티</a></nav>',
+        1,
+    )
+    body = body.replace(
+        '<a href="#" class="btn-white">회원가입하기</a>',
+        '<a href="?view=login" data-didimdol-route="login" target="_self" class="btn-white">회원가입하기</a>'
+    )
+    body = body.replace(
+        '<a href="#" class="btn-start">',
+        '<a href="?view=diagnosis-live" data-didimdol-route="diagnosis-live" target="_self" class="btn-start">'
+    )
+    body = body.replace('Prompt Coach<br>를 통한 실시간 코칭', '실시간 AI 활용 코칭')
+    body = body.replace(
+        'AI 사용법 미숙과 질문 작성의 어려움을 해소할 수 있도록, 목적과 맥락에 맞는 질문법을 실시간으로 교정해 주는 Prompt Coach를 제공합니다.',
+        'AI 사용법 미숙과 질문 작성의 어려움을 해소할 수 있도록, 목적과 맥락에 맞는 AI 활용 전략과 질문 방식을 실시간으로 코칭합니다.'
+    )
+
     if name == 'diagnosis.html':
         body = body.replace('소요 시간: 약 3~5분 (총 12문항 / 영역별 4문항)',
                             '소요 시간: 약 5~8분 (총 7개 상황 / 6개 역량)')
@@ -45,11 +62,11 @@ def original_fragment(name: str) -> str:
     [data-testid="stMainBlockContainer"],.block-container{max-width:100%!important;width:100%!important;padding:0!important;}
     [data-testid="stAppViewContainer"],.stApp{background:#fff!important;}
     [data-testid="stHeader"]{display:none!important;}
+    [data-testid="stToolbar"]{display:none!important;}
     #MainMenu,footer{visibility:hidden!important;}
     [data-testid="stVerticalBlock"]{gap:0!important;}
     [data-testid="stElementContainer"]{width:100%;}
     '''
-    # Static trusted JS: 클릭을 Streamlit 버튼 이벤트로 전달해 새 페이지 로드 없이 이동
     js = '''<script>
     if (!window.__didimdolRouteListener) {
       window.__didimdolRouteListener = true;
@@ -60,7 +77,6 @@ def original_fragment(name: str) -> str:
         if (!ROUTES.includes(route)) return;
         const button = document.querySelector('.st-key-route_' + route + ' button');
         if (button) { e.preventDefault(); e.stopPropagation(); button.click(); }
-        // 버튼이 없으면 href가 백업 경로 역할을 합니다.
       }, true);
     }
     </script>'''.replace('ROUTES', str(list(ROUTES)).replace("'", '"'))
