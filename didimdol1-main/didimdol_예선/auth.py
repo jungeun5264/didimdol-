@@ -47,8 +47,13 @@ def load_user_data(user):
                  'page', 'selected_id', 'category', 'messages', 'training_plan',
                  'revealed_events', 'event_index', 'outputs', 'attempts',
                  'attempt_no', 'draft_message', '_clear_draft_message',
-                 'baseline', 'diagnosis_baseline_is_real', 'saved_diagnosis_digest'):
+                 'baseline', 'diagnosis_baseline_is_real', 'saved_diagnosis_digest',
+                 'onboarding_owner', 'onboarding_answers', 'onboarding_step',
+                 'type_survey_just_completed'):
         st.session_state.pop(name, None)
+    for key in list(st.session_state):
+        if key.startswith('survey_q_'):
+            st.session_state.pop(key, None)
     if saved:
         st.session_state['stage'] = 13
         st.session_state['answers'] = saved['answers']
@@ -194,7 +199,8 @@ def render_auth(view, navigate):
                     else:
                         load_user_data(record)
                         st.session_state['auth_user'] = record
-                        dest = st.session_state.pop('post_login_view', 'mypage')
-                        navigate(dest)
+                        # 새 계정은 유형 설문을 마친 후 마이페이지로 이동합니다.
+                        st.session_state.pop('post_login_view', None)
+                        navigate('onboarding')
         if not store.is_hosted_database():
             st.caption('현재 로컬 SQLite 저장소를 사용합니다. Streamlit Cloud 배포 전 DATABASE_URL 설정이 필요합니다.')
