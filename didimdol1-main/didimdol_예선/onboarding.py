@@ -78,3 +78,4 @@ def render(navigate):
     st.session_state.pop('onboarding_step', None)
     st.session_state['type_survey_just_completed'] = True
     navigate('mypage')
+
