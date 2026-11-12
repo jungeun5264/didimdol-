@@ -153,6 +153,93 @@ def render_auth(view, navigate):
         border-radius:24px;padding:28px 32px;box-shadow:0 8px 25px rgba(22,83,48,.06);}
       .st-key-auth_card .stButton>button[kind="primary"]{background:#238954;border-color:#238954;color:white;}
       .st-key-auth_card input{background:#fff!important;color:#203528!important;}
+
+      /* 로그인/회원가입: 텍스트와 배경의 명도 대비를 명시적으로 고정합니다. */
+      .st-key-auth_card {
+        color-scheme: light !important;
+        background: #ffffff !important;
+        color: #1b3026 !important;
+      }
+      .st-key-auth_card [data-testid="stWidgetLabel"] p,
+      .st-key-auth_card label p {
+        color: #22372b !important;
+        font-weight: 700 !important;
+      }
+      .st-key-auth_card [data-testid="stTextInput"] input,
+      .st-key-auth_card input[type="text"],
+      .st-key-auth_card input[type="password"] {
+        background-color: #ffffff !important;
+        color: #192d23 !important;
+        -webkit-text-fill-color: #192d23 !important;
+        border-radius: 11px !important;
+        caret-color: #176a40 !important;
+        box-shadow: none !important;
+      }
+      .st-key-auth_card [data-testid="stTextInput"] input::placeholder {
+        color: #69786f !important;
+        -webkit-text-fill-color: #69786f !important;
+        opacity: 1 !important;
+      }
+      .st-key-auth_card [data-testid="stTextInput"]:focus-within [data-baseweb="input"],
+      .st-key-auth_card [data-testid="stTextInput"]:focus-within input {
+        border-color: #238954 !important;
+      }
+      /* 눈 아이콘: 어두운 테마의 잔여 색상도 제거 */
+      .st-key-auth_card [data-testid="stTextInput"] button,
+      .st-key-auth_card [data-testid="stTextInput"] [data-baseweb="input"] {
+        background-color: #ffffff !important;
+        color: #314a3b !important;
+      }
+      .st-key-auth_card [data-testid="stTextInput"] button svg {
+        color: #314a3b !important;
+        stroke: #314a3b !important;
+      }
+      /* Streamlit 오류 알림: 옅은 분홍 배경에 진한 적색 텍스트 */
+      .st-key-auth_card [data-testid="stAlert"],
+      .st-key-auth_card [data-testid="stAlert"] [data-baseweb="notification"],
+      .st-key-auth_card [data-testid="stAlert"] [data-testid^="stAlertContent"],
+      [data-testid="stAlert"]:has([data-testid="stAlertContentError"]),
+      [data-testid="stAlertContentError"] {
+        background: #fff0f1 !important;
+        border-color: #e9a6ad !important;
+      }
+      .st-key-auth_card [data-testid="stAlert"] p,
+      .st-key-auth_card [data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+      .st-key-auth_card [data-testid="stAlert"] [data-testid="stMarkdownContainer"] *,
+      [data-testid="stAlertContentError"] p,
+      [data-testid="stAlertContentError"] * {
+        color: #842536 !important;
+        -webkit-text-fill-color: #842536 !important;
+        font-weight: 650 !important;
+        opacity: 1 !important;
+      }
+      .st-key-auth_card [data-testid="stAlert"] svg,
+      [data-testid="stAlertContentError"] svg {
+        color: #a5283c !important;
+        fill: currentColor !important;
+      }
+      /* 비밀번호 안내 / DB 경고 안내: 연한 회색 대신 진한 녹색빛 회색 */
+      .st-key-auth_card [data-testid="stCaptionContainer"],
+      .st-key-auth_card [data-testid="stCaptionContainer"] p,
+      .st-key-auth_card [data-testid="stCaptionContainer"] span {
+        color: #465b50 !important;
+        -webkit-text-fill-color: #465b50 !important;
+        font-size: 13px !important;
+        font-weight: 550 !important;
+        line-height: 1.65 !important;
+        opacity: 1 !important;
+      }
+      .st-key-auth_card [data-testid="stFormSubmitButton"] button[kind="primary"] {
+        background: #237748 !important;
+        border-color: #237748 !important;
+        color: #ffffff !important;
+        font-weight: 750 !important;
+      }
+      .st-key-auth_card [data-testid="stFormSubmitButton"] button[kind="primary"] *,
+      .st-key-auth_card [data-testid="stFormSubmitButton"] button[kind="primary"] p {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+      }
       </style><div class="auth-intro"><div class="auth-eyebrow">DIDIMDOL · ACCOUNT</div>
       <div class="auth-title">디딤돌</div><div class="auth-subtitle">나의 AI 역량 성장 기록을 안전하게 관리하세요.</div></div>''')
     if current_user():
@@ -204,3 +291,4 @@ def render_auth(view, navigate):
                         navigate('onboarding')
         if not store.is_hosted_database():
             st.caption('현재 로컬 SQLite 저장소를 사용합니다. Streamlit Cloud 배포 전 DATABASE_URL 설정이 필요합니다.')
+
