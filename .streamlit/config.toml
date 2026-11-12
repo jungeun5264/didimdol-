@@ -1,0 +1,30 @@
+# 디딤돌 전체 UI 통일: 밝은 기본 테마 + 의미별 읽기 쉬운 안내 색
+# Streamlit Community Cloud에서는 저장소 최상위의 .streamlit/config.toml로 배치
+[theme]
+base = "light"
+primaryColor = "#237748"
+backgroundColor = "#F6FAF7"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#19372A"
+linkColor = "#176444"
+borderColor = "#CBDDD1"
+
+# 안내 / 오류 / 성공 / 경고 메시지의 배경과 텍스트 대비 보장
+blueColor = "#2B6DA7"
+blueBackgroundColor = "#EAF3FC"
+blueTextColor = "#183E63"
+redColor = "#B53B4C"
+redBackgroundColor = "#FCEDEF"
+redTextColor = "#84263A"
+greenColor = "#237748"
+greenBackgroundColor = "#E9F6EE"
+greenTextColor = "#205F3C"
+orangeColor = "#A45B16"
+orangeBackgroundColor = "#FFF3DF"
+orangeTextColor = "#75400C"
+yellowColor = "#8B6500"
+yellowBackgroundColor = "#FFF7DC"
+yellowTextColor = "#665000"
+grayColor = "#667985"
+grayBackgroundColor = "#F0F4F6"
+grayTextColor = "#465762"
