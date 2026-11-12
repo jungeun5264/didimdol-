@@ -114,3 +114,81 @@ hr{border-color:#dcece1!important;margin:.4rem 0 2rem!important;}
   [class*="st-key-menu_"] button,
   [class*="st-key-action_"] button{font-size:.88rem!important;}
 }
+/* ==========================================================
+   디딤돌: 전역 알림/폼/안내 가독성 보완
+   기존 ui.css 마지막 줄에 '추가'합니다. 기존 CSS는 지우지 마세요.
+   CSS 셀렉터는 Streamlit 버전에 따라 변경될 수 있습니다.
+   ========================================================== */
+
+/* 정보/오류/경고/성공 안내 박스: 다크 테마 배경과 어두운 텍스트의 충돌 방지 */
+.stApp [data-testid="stAlert"],
+.stApp [data-testid="stAlert"] > div,
+.stApp [data-testid="stAlert"] [data-baseweb="notification"] {
+  background-color: #EFF6FC !important;
+  border-color: #B8D3E7 !important;
+  color: #183E63 !important;
+}
+.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] p,
+.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] li,
+.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] strong,
+.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] span,
+.stApp [data-testid="stAlert"] [data-testid="stAlertContentContainer"] {
+  color: #183E63 !important;
+  opacity: 1 !important;
+}
+.stApp [data-testid="stAlert"] svg {
+  color: #246A9A !important;
+}
+
+/* 작은 도움말/설명/설문 진행 안내 문구 */
+.stApp [data-testid="stCaptionContainer"],
+.stApp [data-testid="stCaptionContainer"] p,
+.stApp [data-testid="stCaptionContainer"] span,
+.stApp [data-testid="stWidgetLabel"] p,
+.stApp [data-testid="stRadio"] label,
+.stApp [data-testid="stCheckbox"] label,
+.stApp [data-testid="stForm"] label {
+  color: #354E42 !important;
+  opacity: 1 !important;
+}
+
+/* 사용자 입력값과 플레이스홀더 */
+.stApp [data-testid="stTextInput"] input,
+.stApp [data-testid="stTextArea"] textarea,
+.stApp [data-testid="stNumberInput"] input,
+.stApp [data-testid="stChatInput"] textarea {
+  background-color: #FFFFFF !important;
+  color: #1C3529 !important;
+  -webkit-text-fill-color: #1C3529 !important;
+  border-color: #B6CEC0 !important;
+}
+.stApp input::placeholder,
+.stApp textarea::placeholder {
+  color: #617366 !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #617366 !important;
+}
+
+/* 선택형 위젯, 드롭다운의 선택 글씨 */
+.stApp [data-baseweb="select"] > div,
+.stApp [data-baseweb="input"] > div {
+  background-color: #FFFFFF !important;
+  color: #1C3529 !important;
+}
+.stApp [data-baseweb="select"] [aria-selected],
+.stApp [data-baseweb="select"] span,
+.stApp [data-testid="stProgress"] p {
+  color: #1C3529 !important;
+}
+
+/* 앱 내 시스템 토스트 메시지 */
+.stApp [data-testid="stToast"],
+.stApp [data-testid="stToast"] > div {
+  background: #F0F7F2 !important;
+  color: #214735 !important;
+}
+.stApp [data-testid="stToast"] p {
+  color: #214735 !important;
+}
+
