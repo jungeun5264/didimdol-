@@ -183,12 +183,3 @@ a:focus-visible { outline: 3px solid #1b5e3a; outline-offset: 3px; }
   .step__img { width: 100%; }
   .btn-dark { width: 100%; max-width: 300px; height: 110px; margin-top: 40px; font-size: 18px; }
 }
-
-
-/* 디딤돌 연동 보완: 모바일 메뉴 접근성. 데스크톱 디자인 유지 */
-@media (max-width: 768px) {
-  .header { height: auto; min-height: 72px; padding: 14px 18px; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .gnb { display: flex; width: 100%; overflow-x: auto; gap: 20px; white-space: nowrap; font-size: 14px; padding-bottom: 7px; }
-  .gnb a + a, .gnb a:nth-child(2), .gnb a:nth-child(3), .gnb a:nth-child(4), .gnb a:nth-child(5) { margin-left: 0; }
-}
-

@@ -1,0 +1,154 @@
+/* 로그인·회원가입 페이지 전용 스타일 (공통 토큰은 style.css) */
+:root {
+  --sub-text: #d3ffe4;
+  --tab-bg: #def2e5;
+  --input-line: #c3c3c3;
+  --error: #d64545;
+}
+
+.auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* ===== 왼쪽 브랜드 영역 ===== */
+.auth__brand {
+  position: relative;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 0 90px 167px;
+  background: var(--green);
+  color: var(--white);
+}
+.auth__logo {
+  display: flex; align-items: center;
+  height: 124px;
+  font-size: 36px; font-weight: 800; color: var(--white);
+  align-self: flex-start;
+}
+.auth__headline { font-size: 56px; line-height: 66px; font-weight: 500; letter-spacing: -0.7px; }
+.auth__desc { margin-top: 18px; font-size: 20px; line-height: 28px; font-weight: 300; color: var(--sub-text); }
+
+/* ===== 오른쪽 폼 영역 ===== */
+.auth__panel {
+  display: flex; justify-content: center;
+  padding: 307px 24px 80px;
+  background: var(--white);
+}
+.auth__box { width: 343px; }
+.auth__title { font-size: 30px; line-height: 36px; font-weight: 700; color: var(--gray-title); }
+.auth__sub { margin-top: 6px; font-size: 10px; line-height: 14px; color: var(--gray-title); }
+
+/* 탭 (세그먼트 컨트롤) */
+.auth-tabs {
+  margin-top: 25px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 11px;
+  height: 47px; padding: 6px;
+  background: var(--tab-bg);
+  border-radius: 8px;
+}
+.auth-tabs__btn {
+  appearance: none; border: 0; cursor: pointer;
+  background: transparent;
+  border-radius: 6px;
+  font: inherit; font-size: 11px; font-weight: 500; color: var(--gray-title);
+  transition: background-color .2s, color .2s;
+}
+.auth-tabs__btn[aria-selected="true"] { background: var(--white); color: var(--green-dark); }
+.auth-tabs__btn:not([aria-selected="true"]):hover { color: var(--green-dark); }
+
+/* 입력 필드 */
+.auth-form { margin-top: 18px; }
+.field + .field { margin-top: 10px; }
+.field[hidden] { display: none; }
+.field label {
+  display: block;
+  font-size: 12px; line-height: 16px; font-weight: 500; color: var(--gray-title);
+}
+.field input {
+  display: block; width: 100%; height: 47px;
+  margin-top: 8px; padding: 0 16px;
+  border: 1px solid var(--input-line); border-radius: 8px;
+  background: var(--white);
+  font: inherit; font-size: 14px; color: #333;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(78, 189, 120, .18); }
+.field input.is-error { border-color: var(--error); }
+
+/* 안내 메시지: 빈 상태에서도 높이를 유지해 시안 간격(27px)을 그대로 둠 */
+.auth-form__msg {
+  height: 14px; margin: 6px 0;
+  font-size: 11px; line-height: 14px; color: var(--error);
+}
+.auth-form__msg.is-ok { color: var(--green-dark); }
+
+/* 비밀번호 보기/숨기기 */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 48px; }
+.pw-wrap input::-ms-reveal { display: none; }
+.pw-toggle {
+  position: absolute; top: 50%; right: 8px;
+  width: 34px; height: 34px; margin-top: -17px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; border: 0; border-radius: 6px; cursor: pointer;
+  background: transparent; color: #a5a5a5;
+  transition: color .2s, background-color .2s;
+}
+.pw-toggle:hover { color: var(--green-dark); background: #f1f8f3; }
+.pw-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 0; }
+.pw-toggle__hide { display: none; }
+.pw-toggle[aria-pressed="true"] { color: var(--green-dark); }
+.pw-toggle[aria-pressed="true"] .pw-toggle__show { display: none; }
+.pw-toggle[aria-pressed="true"] .pw-toggle__hide { display: block; }
+
+/* 제출 버튼 */
+.btn-submit {
+  display: flex; align-items: center; justify-content: flex-start; gap: 7px;
+  width: 100%; height: 53px;
+  padding: 0 0 0 88px; /* 문구는 고정 폭 가운데 정렬, 화살표 위치는 탭과 무관하게 고정 */
+  border: 0; border-radius: 6px; cursor: pointer;
+  background: var(--green-dark); color: var(--white);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, .3);
+  font: inherit; font-size: 15px; font-weight: 700;
+  transition: background-color .2s, transform .2s;
+}
+.btn-submit__label { width: 100px; text-align: center; }
+.btn-submit:hover { background: #2a6d44; }
+.btn-submit:hover svg { transform: translateX(4px); }
+.btn-submit svg { flex: none; margin-bottom: 4px; transition: transform .2s; }
+.btn-submit:active { transform: translateY(1px); }
+
+.auth-tabs__btn:focus-visible,
+.btn-submit:focus-visible,
+.auth__logo:focus-visible { outline: 3px solid #1b5e3a; outline-offset: 3px; }
+
+/* ===== 낮은 화면 높이 ===== */
+@media (max-height: 900px) and (min-width: 1025px) {
+  .auth__panel { padding-top: 22vh; }
+}
+
+/* ===== 태블릿·모바일: 시안에 없는 구간이라 세로로 쌓음 ===== */
+@media (max-width: 1024px) {
+  .auth { grid-template-columns: 1fr; min-height: 0; }
+  .auth__brand { padding: 0 32px 56px; min-height: 0; }
+  .auth__logo { height: 88px; }
+  .auth__copy { margin-top: 48px; }
+  .auth__headline { font-size: clamp(28px, 5vw, 44px); line-height: 1.25; }
+  .auth__desc { margin-top: 16px; font-size: clamp(14px, 2vw, 18px); line-height: 1.5; }
+  .auth__panel { padding: 64px 24px 96px; }
+  .auth__box { width: 100%; max-width: 400px; }
+}
+@media (max-width: 768px) {
+  .auth__brand { padding: 0 20px 40px; }
+  .auth__logo { height: 72px; font-size: 28px; }
+  .auth__copy { margin-top: 24px; }
+  .auth__panel { padding: 48px 20px 72px; }
+  .auth__title { font-size: 26px; }
+  .auth__sub { font-size: 12px; line-height: 16px; }
+  .auth-tabs__btn { font-size: 13px; }
+  .field label { font-size: 13px; line-height: 18px; }
+  .auth-form__msg { font-size: 12px; height: 16px; }
+  .btn-submit { font-size: 15px; justify-content: center; padding: 0; gap: 24px; }
+  .btn-submit__label { width: auto; }
+}
