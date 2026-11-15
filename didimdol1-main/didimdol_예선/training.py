@@ -21,11 +21,12 @@ from scoring import (
 load_dotenv()
 # Streamlit 페이지 설정은 통합 웹의 app.py에서 한 번만 수행합니다.
 
-PRIMARY = "#6258E8"
-TEAL = "#735BDE"
-INK = "#172033"
-MUTED = "#6B7280"
-SURFACE = "#F6FAF7"
+# 디딤돌 디자인 토큰 (ui.css의 --dd-* 값과 동일)
+PRIMARY = "#338251"
+TEAL = "#4EBD78"
+INK = "#333333"
+MUTED = "#727272"
+SURFACE = "#FFFFFF"
 BASELINE = {
     "ai_basic": 62, "ai_usage": 58, "human_agency": 55,
     "human_responsibility": 52, "ethical_view": 68, "safe_use": 72,
@@ -310,20 +311,20 @@ def radar(
         vals = [comparison[k] for k in ABILITY_ORDER]
         fig.add_trace(go.Scatterpolar(
             r=vals+[vals[0]], theta=theta, fill="toself", name=comparison_label,
-            line=dict(color="#A6A9B6", width=2), fillcolor="rgba(166,169,182,.08)",
+            line=dict(color="#B5B5B5", width=2), fillcolor="rgba(181,181,181,.10)",
             hovertemplate="%{theta}: %{r}점<extra>"+comparison_label+"</extra>",
         ))
     vals = [profile[k] for k in ABILITY_ORDER]
     fig.add_trace(go.Scatterpolar(
         r=vals+[vals[0]], theta=theta, fill="toself", name=current_label,
-        line=dict(color=PRIMARY, width=3), fillcolor="rgba(35,137,84,.16)",
+        line=dict(color=PRIMARY, width=3), fillcolor="rgba(78,189,120,.18)",
         hovertemplate="%{theta}: %{r}점<extra>"+current_label+"</extra>",
     ))
     fig.update_layout(
         polar=dict(
             bgcolor="white",
-            radialaxis=dict(visible=True, range=[0,100], tickvals=[20,40,60,80,100], tickfont=dict(size=9, color="#9B9EAA"), gridcolor="#ECEEF4"),
-            angularaxis=dict(gridcolor="#E6E8EF", tickfont=dict(size=12, color="#404657")),
+            radialaxis=dict(visible=True, range=[0,100], tickvals=[20,40,60,80,100], tickfont=dict(size=9, color="#9B9EAA"), gridcolor="#DEF2E5"),
+            angularaxis=dict(gridcolor="#DEF2E5", tickfont=dict(size=12, color="#555555")),
         ),
         paper_bgcolor="white", plot_bgcolor="white", showlegend=True, height=500,
         margin=dict(l=80,r=80,t=60,b=40),
@@ -385,7 +386,7 @@ def result_page():
             if scores[key] is None:
                 retained = cur["profile"][key]
                 st.markdown(
-                    f'<div style="margin:12px 0 2px;color:#9AA0AE;font-size:14px;">'
+                    f'<div style="margin:12px 0 2px;color:#9A9A9A;font-size:14px;">'
                     f'{label} · <b>미평가</b> <span style="font-size:12px;">(프로필 {retained}점 유지)</span></div>',
                     unsafe_allow_html=True,
                 )
