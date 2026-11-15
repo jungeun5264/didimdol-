@@ -1,194 +1,147 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
-:root { --di-green:#238954; --di-dark:#153c2c; --di-soft:#e8f6ed; --di-bg:#f6faf7; --di-muted:#64756d; }
-html,body,.stApp,[data-testid="stAppViewContainer"]{background:var(--di-bg)!important;color:#1c3128!important;font-family:'Noto Sans KR',Pretendard,sans-serif!important;}
-[data-testid="stHeader"] {background:transparent!important;}
-[data-testid="stToolbar"]{display:none!important;}
-[data-testid="stMainBlockContainer"],.block-container {max-width:1190px!important;padding:1.35rem 1.7rem 5rem!important;}
-#MainMenu,footer{visibility:hidden!important;}
-[data-testid="stMarkdownContainer"]{color:#1c3128;}
-h1,h2,h3 {letter-spacing:-.035em!important;}
-h1{font-size:2.2rem!important;font-weight:850!important;color:#133b2a!important;}
-[data-testid="stMarkdownContainer"] p {line-height:1.75;}
-[data-testid="stChatMessage"] {background:white!important;color:#183629!important;border:1px solid #deebe2!important;border-radius:18px!important;padding:14px 17px!important;}
-[data-testid="stChatMessage"] p,[data-testid="stChatMessage"] li,[data-testid="stChatMessage"] strong {color:#183629!important;}
-[data-testid="stTextArea"] textarea,[data-testid="stTextInput"] input {background:#fff!important;color:#1b3328!important;border:1px solid #bfd4c5!important;border-radius:13px!important;}
-[data-testid="stChatInput"] textarea{background:#fff!important;color:#1b3328!important;}
-[data-testid="stWidgetLabel"] p{color:#35493c!important;}
-[data-testid="stCaptionContainer"] p{color:#60756b!important;}
-div.stButton>button,div.stFormSubmitButton>button{border-radius:12px!important;border:1px solid #cfe0d4!important;color:#24553a!important;background:#fff!important;font-weight:700!important;min-height:45px!important;box-shadow:0 2px 8px rgba(21,60,44,.035)!important;}
-div.stButton>button:hover,div.stFormSubmitButton>button:hover{border-color:#238954!important;background:#f0faf3!important;color:#1c7648!important;}
-div.stButton>button[kind="primary"],div.stFormSubmitButton>button[kind="primary"] {background:#238954!important;color:white!important;border-color:#238954!important;}
-div.stButton>button[kind="primary"] *,div.stFormSubmitButton>button[kind="primary"] *{color:white!important;}
-div.stButton>button[kind="primary"]:hover,div.stFormSubmitButton>button[kind="primary"]:hover{background:#156c40!important;color:white!important;}
-div.stButton>button:disabled{background:#e7eee9!important;border-color:#d5e3d9!important;color:#9bada0!important;}
-[data-testid="stProgress"] [data-testid="stProgressBar"] {background:#c8e6d3!important;}
-.st-key-nav_brand button{font-weight:900!important;font-size:1.32rem!important;color:#258b56!important;border:none!important;box-shadow:none!important;background:transparent!important;text-align:left!important;}
-[class*="st-key-nav_"] button{box-shadow:none!important;min-height:47px!important;font-size:.86rem!important;}
-[class*="st-key-nav_"] button[kind="secondary"]{border:none!important;background:transparent!important;color:#426752!important;}
-[class*="st-key-nav_"] button[kind="primary"] {background:#e2f3e7!important;border:0!important;color:#1d7e48!important;}
-hr{border-color:#dcece1!important;margin:1.1rem 0 2.2rem!important;}
-.st-key-landing_hero{background:linear-gradient(125deg,#188451 0%,#349b62 65%,#65bc89 100%)!important;border-radius:25px!important;padding:64px 66px 66px!important;min-height:375px;color:white!important;box-shadow:0 15px 30px rgba(24,117,66,.12);}
-.st-key-landing_hero [data-testid="stMarkdownContainer"] p,.st-key-landing_hero [data-testid="stMarkdownContainer"] h1{color:white!important;}
-.hero-kicker{letter-spacing:.18em;font-size:12px;font-weight:800;color:#d1f5db!important;}
-.landing-title{font-size:clamp(30px,4.4vw,53px)!important;font-weight:850!important;line-height:1.3!important;color:white!important;margin:23px 0 16px!important;}
-.landing-title span{color:#d7ffdf!important;}
-.landing-sub{font-size:18px!important;color:#edf9ef!important;margin:0 0 42px!important;}
-.st-key-landing_hero div.stButton>button{min-height:55px!important;border-color:transparent!important;}
-.st-key-landing_hero div.stButton>button[kind="primary"]{background:white!important;color:#197746!important;border:0!important;}
-.st-key-landing_hero div.stButton>button[kind="primary"] *{color:#197746!important;}
-.st-key-landing_hero div.stButton>button[kind="secondary"]{background:#e9f7ec!important;color:#155d39!important;}
-.eyebrow{font-size:12px;font-weight:900;letter-spacing:.19em;color:#2c965b;margin-top:38px;margin-bottom:10px;}
-.page-section-title{font-size:27px!important;font-weight:850;margin-bottom:22px;color:#1b3d2b!important;}
-.feature-card{background:white;border:1px solid #dfeee4;border-radius:20px;padding:27px 25px;min-height:228px;box-shadow:0 6px 16px rgba(24,95,53,.035);}
-.feature-no{font-size:13px;font-weight:900;color:#239658;background:#e5f5ea;padding:7px 11px;border-radius:9px;display:inline-block;margin-bottom:15px;}
-.feature-card h3{font-size:19px!important;font-weight:800;color:#183e2c;line-height:1.4;margin:5px 0 13px;}
-.feature-card p{font-size:14px!important;color:#607369!important;line-height:1.7!important;}
-.st-key-landing_bottom,.st-key-diag_intro{background:white!important;border:1px solid #dfeee4;border-radius:20px!important;padding:25px 30px!important;margin:30px 0 10px;}
-.st-key-landing_bottom h3,.st-key-diag_intro h3{color:#1b5336!important;font-weight:800!important;}
-.section-lead{color:#607369;font-size:17px;margin:0 0 25px;}
-.mini-note{display:inline-block;background:#eaf7ee;color:#376b4d;border-radius:7px;font-size:13px;padding:7px 11px;margin-bottom:20px;}
-.diag-heading{font-size:30px;font-weight:850;color:#163e2b;}
-.diag-subheading{font-size:15px;color:#61776b;margin-bottom:14px;}
-.diag-progress-label{font-size:13px;color:#3b8b5a;font-weight:800;letter-spacing:.02em;}
-.diag-question-tag{font-size:13px;font-weight:850;color:#298b56;margin-top:12px;margin-bottom:5px;}
-.quick-result-hero{background:#e7f6ed;border-radius:18px;padding:23px 25px;margin:14px 0 22px;border:1px solid #cae6d4;}
-.quick-result-hero h2{font-size:23px;color:#1a5c3b;margin:0 0 12px;}
-.quick-result-hero p{color:#426c53;margin:0;}
-@media (max-width:768px) { [data-testid="stMainBlockContainer"],.block-container{padding:1rem 1rem 4rem!important;} .st-key-landing_hero{padding:38px 24px!important;min-height:auto;} .landing-title{font-size:30px!important;} .landing-sub{font-size:15px!important;} .feature-card{min-height:auto;} }
 
 
-/* Updated top navigation */
-.st-key-topbar_shell{
-  position: sticky;
-  top: .4rem;
-  z-index: 30;
-  background: rgba(246,250,247,.90);
-  backdrop-filter: blur(12px);
-  border: 1px solid #dcece1;
-  border-radius: 22px;
-  padding: .75rem .9rem;
-  box-shadow: 0 10px 24px rgba(21,60,44,.05);
-  margin-bottom: 1.2rem;
-}
-.st-key-topbar_shell [data-testid="stHorizontalBlock"]{align-items:center;}
-.st-key-brand_home button{
-  min-height:48px!important;
-  border:none!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  color:#1d7e48!important;
-  font-size:1.45rem!important;
-  font-weight:900!important;
-  justify-content:flex-start!important;
-  padding-left:.25rem!important;
-}
-[class*="st-key-menu_"] button,
-[class*="st-key-action_"] button{
-  min-height:46px!important;
-  border-radius:14px!important;
-  font-size:.95rem!important;
-  font-weight:700!important;
-  box-shadow:none!important;
-  white-space:nowrap!important;
-}
-[class*="st-key-menu_"] button[kind="secondary"],
-[class*="st-key-action_"] button[kind="secondary"]{
-  border:1px solid #d9e7de!important;
-  background:#ffffff!important;
-  color:#355848!important;
-}
-[class*="st-key-menu_"] button[kind="secondary"]:hover,
-[class*="st-key-action_"] button[kind="secondary"]:hover{
-  border-color:#afd0ba!important;
-  background:#f6fbf8!important;
-  color:#1f6f45!important;
-}
-[class*="st-key-menu_"] button[kind="primary"],
-[class*="st-key-action_"] button[kind="primary"]{
-  border:1px solid #d7efe0!important;
-  background:#eaf7ef!important;
-  color:#1d7e48!important;
-}
-hr{border-color:#dcece1!important;margin:.4rem 0 2rem!important;}
-@media (max-width: 1200px){
-  [class*="st-key-menu_"] button,
-  [class*="st-key-action_"] button{font-size:.88rem!important;}
-}
-/* ==========================================================
-   디딤돌: 전역 알림/폼/안내 가독성 보완
-   기존 ui.css 마지막 줄에 '추가'합니다. 기존 CSS는 지우지 마세요.
-   CSS 셀렉터는 Streamlit 버전에 따라 변경될 수 있습니다.
-   ========================================================== */
+/* 디딤돌 공통 UI — 친구 Figma 시안(index.html·diagnosis.html)과 로그인 시안의 디자인 토큰을
+   Streamlit 화면(마이페이지·사전진단·훈련·Prompt Coach)에 그대로 적용합니다. */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
-/* 정보/오류/경고/성공 안내 박스: 다크 테마 배경과 어두운 텍스트의 충돌 방지 */
-.stApp [data-testid="stAlert"],
-.stApp [data-testid="stAlert"] > div,
-.stApp [data-testid="stAlert"] [data-baseweb="notification"] {
-  background-color: #EFF6FC !important;
-  border-color: #B8D3E7 !important;
-  color: #183E63 !important;
-}
-.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"],
-.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] p,
-.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] li,
-.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] strong,
-.stApp [data-testid="stAlert"] [data-testid="stMarkdownContainer"] span,
-.stApp [data-testid="stAlert"] [data-testid="stAlertContentContainer"] {
-  color: #183E63 !important;
-  opacity: 1 !important;
-}
-.stApp [data-testid="stAlert"] svg {
-  color: #246A9A !important;
+:root {
+  --dd-green: #4ebd78;        /* 브랜드 면 */
+  --dd-green-dark: #338251;   /* 주요 버튼·활성 메뉴 */
+  --dd-green-deeper: #2a6d44; /* 버튼 hover */
+  --dd-green-light: #c7e5d3;  /* 보조 면 */
+  --dd-tab-bg: #def2e5;       /* 탭·칩 배경 */
+  --dd-mint: #f3faf6;         /* 아주 옅은 면 */
+  --dd-on-green: #d3ffe4;     /* 초록 위 보조 글자 */
+  --dd-gray: #7b7b7b;         /* 제목 회색 */
+  --dd-gray-sub: #727272;
+  --dd-nav: #656565;
+  --dd-text: #333;
+  --dd-line: #c3c3c3;         /* 입력칸 테두리 */
+  --dd-shadow: 4px 4px 4px rgba(0, 0, 0, .25);
+  --dd-btn-shadow: 2px 2px 4px rgba(0, 0, 0, .3);
 }
 
-/* 작은 도움말/설명/설문 진행 안내 문구 */
-.stApp [data-testid="stCaptionContainer"],
-.stApp [data-testid="stCaptionContainer"] p,
-.stApp [data-testid="stCaptionContainer"] span,
-.stApp [data-testid="stWidgetLabel"] p,
-.stApp [data-testid="stRadio"] label,
-.stApp [data-testid="stCheckbox"] label,
-.stApp [data-testid="stForm"] label {
-  color: #354E42 !important;
-  opacity: 1 !important;
+/* ===== 기본 ===== */
+html, body, .stApp, [data-testid="stAppViewContainer"] {
+  background: #fff !important; color: var(--dd-text) !important;
+  font-family: "Pretendard", -apple-system, "Noto Sans KR", sans-serif !important;
+  word-break: keep-all;
+}
+.stApp button, .stApp input, .stApp textarea, .stApp select { font-family: inherit !important; }
+[data-testid="stHeader"] { display: none !important; }
+#MainMenu, footer { visibility: hidden !important; }
+.stApp [data-testid="stMainBlockContainer"] {
+  max-width: 1256px !important; padding: 0 0 6rem !important;
+}
+[data-testid="stMarkdownContainer"] { color: var(--dd-text); }
+[data-testid="stMarkdownContainer"] p { line-height: 1.75; }
+h1, h2, h3, h4 { letter-spacing: -.02em !important; }
+h1 { font-size: 2.2rem !important; font-weight: 800 !important; color: var(--dd-gray-sub) !important; }
+h2, h3 { font-weight: 700 !important; color: var(--dd-gray-sub) !important; }
+h4 { font-weight: 700 !important; color: #555 !important; }
+hr { border-color: var(--dd-tab-bg) !important; }
+
+/* 헤더는 index.html 원본 마크업·CSS를 그대로 사용 (friend_pages.header_fragment) */
+
+/* ===== 버튼 ===== */
+div.stButton > button, div.stFormSubmitButton > button, div.stDownloadButton > button {
+  min-height: 45px !important; border-radius: 8px !important;
+  border: 1px solid var(--dd-line) !important; background: #fff !important;
+  color: var(--dd-green-dark) !important; box-shadow: none !important;
+  transition: background-color .2s, border-color .2s, transform .2s;
+}
+div.stButton > button p, div.stFormSubmitButton > button p { font-weight: 600 !important; }
+div.stButton > button:hover, div.stFormSubmitButton > button:hover {
+  border-color: var(--dd-green) !important; background: var(--dd-mint) !important; color: var(--dd-green-dark) !important;
+}
+div.stButton > button[kind^="primary"], div.stFormSubmitButton > button[kind^="primary"] {
+  background: var(--dd-green-dark) !important; border-color: var(--dd-green-dark) !important;
+  color: #fff !important; box-shadow: var(--dd-btn-shadow) !important;
+}
+div.stButton > button[kind^="primary"] *, div.stFormSubmitButton > button[kind^="primary"] * { color: #fff !important; }
+div.stButton > button[kind^="primary"]:hover, div.stFormSubmitButton > button[kind^="primary"]:hover {
+  background: var(--dd-green-deeper) !important; border-color: var(--dd-green-deeper) !important;
+}
+div.stButton > button:disabled { background: #f1f1f1 !important; border-color: #e0e0e0 !important; color: #aaa !important; box-shadow: none !important; }
+div.stButton > button:disabled * { color: #aaa !important; }
+
+/* ===== 입력 ===== */
+[data-testid="stWidgetLabel"] p { color: var(--dd-gray) !important; font-weight: 500 !important; }
+[data-testid="stTextInputRootElement"], [data-baseweb="textarea"], [data-baseweb="select"] > div {
+  border: 1px solid var(--dd-line) !important; border-radius: 8px !important; background: #fff !important;
+}
+[data-testid="stTextInputRootElement"] > div { background: #fff !important; }
+[data-testid="stTextInputRootElement"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"] > div:focus-within {
+  border-color: var(--dd-green) !important; box-shadow: 0 0 0 3px rgba(78, 189, 120, .18) !important;
+}
+[data-testid="stTextArea"] textarea, [data-testid="stTextInput"] input { background: #fff !important; color: var(--dd-text) !important; border: 0 !important; }
+[data-testid="stChatInput"] { border: 1px solid var(--dd-line) !important; border-radius: 12px !important; background: #fff !important; }
+[data-testid="stChatInput"] textarea { background: #fff !important; color: var(--dd-text) !important; }
+[data-testid="stChatInput"] button { background: var(--dd-green-dark) !important; color: #fff !important; border-radius: 8px !important; }
+[data-testid="stCaptionContainer"] p { color: #8a8a8a !important; }
+[data-baseweb="tag"] { background: var(--dd-tab-bg) !important; color: var(--dd-green-dark) !important; }
+[data-baseweb="tag"] span { color: var(--dd-green-dark) !important; }
+[data-testid="stRadio"] [role="radio"][aria-checked="true"] > div:first-child,
+[data-testid="stCheckbox"] [aria-checked="true"] { background: var(--dd-green-dark) !important; border-color: var(--dd-green-dark) !important; }
+
+/* ===== 카드 · 박스 ===== */
+.stVerticalBlock[class*="st-key-"]:has(> [data-testid="stVerticalBlockBorderWrapper"]),
+[data-testid="stVerticalBlockBorderWrapper"] { border-radius: 16px !important; }
+div[data-testid="stVerticalBlock"][style*="border"],
+[data-testid="stVerticalBlockBorderWrapper"] { border-color: var(--dd-tab-bg) !important; }
+[data-testid="stExpander"] details { border: 1px solid var(--dd-tab-bg) !important; border-radius: 12px !important; background: #fff; }
+[data-testid="stExpander"] summary p { font-weight: 600 !important; color: var(--dd-gray-sub) !important; }
+[data-testid="stMetricValue"] { color: var(--dd-green-dark) !important; font-weight: 800 !important; }
+[data-testid="stMetricLabel"] p { color: var(--dd-gray) !important; }
+
+/* ===== 진행 바 ===== */
+[data-testid="stProgress"] [role="progressbar"] > div > div { background: var(--dd-tab-bg) !important; }
+[data-testid="stProgress"] [role="progressbar"] > div > div > div { background: var(--dd-green) !important; }
+[data-testid="stProgress"] p { color: var(--dd-gray-sub) !important; }
+
+/* ===== 알림 ===== */
+[data-testid="stAlertContainer"] { border-radius: 12px !important; }
+[data-testid="stAlertContentInfo"], [data-testid="stAlertContentSuccess"] { color: #2a6d44 !important; }
+div[data-testid="stAlert"]:has([data-testid="stAlertContentInfo"]) [data-testid="stAlertContainer"],
+div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) [data-testid="stAlertContainer"] {
+  background: var(--dd-mint) !important; border: 1px solid var(--dd-tab-bg);
+}
+[data-testid="stAlertContentInfo"] p, [data-testid="stAlertContentSuccess"] p { color: #2a6d44 !important; }
+
+/* ===== 채팅 ===== */
+[data-testid="stChatMessage"] {
+  background: #fff !important; border: 1px solid var(--dd-tab-bg) !important;
+  border-radius: 16px !important; padding: 14px 17px !important;
+}
+[data-testid="stChatMessage"] p, [data-testid="stChatMessage"] li, [data-testid="stChatMessage"] strong { color: var(--dd-text) !important; }
+
+/* ===== 사전진단(test.py) — 원본 코드는 그대로 두고 화면만 덮어씀 ===== */
+.st-key-test_assessment .hero {
+  border: 0 !important; border-radius: 24px !important;
+  padding: 40px 44px !important; margin-bottom: 22px !important;
+  background: var(--dd-green) !important; box-shadow: var(--dd-shadow);
+}
+.st-key-test_assessment .hero-kicker { color: var(--dd-on-green) !important; font-size: 12px !important; letter-spacing: .14em !important; }
+.st-key-test_assessment .app-title { color: #fff !important; font-size: 40px !important; font-weight: 800 !important; margin: 8px 0 10px !important; }
+.st-key-test_assessment .app-subtitle { color: var(--dd-on-green) !important; font-size: 17px; }
+.st-key-test_assessment .progress-row { color: var(--dd-gray) !important; font-weight: 600; }
+.st-key-test_assessment .question-card { border: 1px solid var(--dd-tab-bg) !important; background: var(--dd-mint) !important; border-radius: 16px !important; }
+.st-key-test_assessment .score-card {
+  border: 0 !important; border-radius: 24px !important; padding: 28px 30px !important;
+  background: var(--dd-tab-bg) !important; color: var(--dd-text);
+}
+.st-key-test_assessment .result-title { color: var(--dd-green-dark) !important; }
+.st-key-test_assessment .score-number { color: var(--dd-green-dark) !important; }
+.st-key-test_assessment .score-label { color: var(--dd-gray) !important; }
+.st-key-test_assessment div.stButton > button { border-radius: 8px !important; }
+.st-key-test_assessment textarea { border-radius: 8px !important; }
+
+.st-key-test_assessment { max-width: 900px; margin: 0 auto; }
+
+@media (max-width: 1300px) {
+  .stApp [data-testid="stMainBlockContainer"] { padding: 0 32px 5rem !important; }
 }
 
-/* 사용자 입력값과 플레이스홀더 */
-.stApp [data-testid="stTextInput"] input,
-.stApp [data-testid="stTextArea"] textarea,
-.stApp [data-testid="stNumberInput"] input,
-.stApp [data-testid="stChatInput"] textarea {
-  background-color: #FFFFFF !important;
-  color: #1C3529 !important;
-  -webkit-text-fill-color: #1C3529 !important;
-  border-color: #B6CEC0 !important;
-}
-.stApp input::placeholder,
-.stApp textarea::placeholder {
-  color: #617366 !important;
-  opacity: 1 !important;
-  -webkit-text-fill-color: #617366 !important;
-}
-
-/* 선택형 위젯, 드롭다운의 선택 글씨 */
-.stApp [data-baseweb="select"] > div,
-.stApp [data-baseweb="input"] > div {
-  background-color: #FFFFFF !important;
-  color: #1C3529 !important;
-}
-.stApp [data-baseweb="select"] [aria-selected],
-.stApp [data-baseweb="select"] span,
-.stApp [data-testid="stProgress"] p {
-  color: #1C3529 !important;
-}
-
-/* 앱 내 시스템 토스트 메시지 */
-.stApp [data-testid="stToast"],
-.stApp [data-testid="stToast"] > div {
-  background: #F0F7F2 !important;
-  color: #214735 !important;
-}
-.stApp [data-testid="stToast"] p {
-  color: #214735 !important;
-}
-
+/* 선택 상자 배경 흰색 */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stSelectbox"] [data-baseweb="select"] input { background-color: #fff !important; }
