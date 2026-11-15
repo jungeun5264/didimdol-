@@ -183,3 +183,16 @@ a:focus-visible { outline: 3px solid #1b5e3a; outline-offset: 3px; }
   .step__img { width: 100%; }
   .btn-dark { width: 100%; max-width: 300px; height: 110px; margin-top: 40px; font-size: 18px; }
 }
+
+/* 통합본: 모바일에서도 기존 디딤돌 메뉴를 접근할 수 있게 표시 */
+@media (max-width: 768px) {
+  .header { height: auto; min-height: 92px; flex-direction: column; align-items: stretch;
+            justify-content: center; gap: 7px; padding: 10px 16px; }
+  .header .logo { display: block; align-self: flex-start; }
+  .header .gnb { display: flex; width: 100%; gap: 17px; white-space: nowrap;
+                  overflow-x: auto; padding: 4px 0 7px; font-size: 13px; }
+  .header .gnb a, .header .gnb a + a,
+  .header .gnb a:nth-child(2), .header .gnb a:nth-child(3),
+  .header .gnb a:nth-child(4), .header .gnb a:nth-child(5) { margin-left: 0; flex: none; }
+}
+
