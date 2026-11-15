@@ -1,214 +1,212 @@
-"""디딤돌 커뮤니티 게시판: 로그인 사용자 전용 Streamlit UI.
-
-사용자 작성 문자열은 st.html/unsafe_allow_html을 사용하지 않고 출력합니다.
-"""
+"""Streamlit 사용자 인증: PBKDF2-HMAC SHA256, 계정별 DB 연동."""
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
+import json
+import os
+import re
+import time
+from copy import deepcopy
 import streamlit as st
-import auth
-import community_store as db
+
+import store
+
+_ITERATIONS = 600_000
+_USER_RX = re.compile(r'^[a-zA-Z0-9_-]{3,24}$')
 
 
-def _safe_error(exc):
-    if isinstance(exc, ValueError):
-        st.error(str(exc))
-    else:
-        st.error('처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.')
+def hash_password(password: str) -> str:
+    salt = os.urandom(16)
+    raw = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, _ITERATIONS)
+    return f'pbkdf2_sha256${_ITERATIONS}${base64.b64encode(salt).decode()}${base64.b64encode(raw).decode()}'
 
 
-def _list_view(user_id):
-    left, right = st.columns([4, 1])
-    with left:
-        st.subheader('게시글 목록')
-    with right:
-        if st.button('새 글 작성', type='primary', use_container_width=True):
-            st.session_state['community_mode'] = 'write'
-            st.rerun()
-
-    a,b=st.columns([1,3])
-    with a:
-        category=st.selectbox('분류', ['전체', *db.CATEGORIES], key='community_filter')
-    with b:
-        term=st.text_input('검색', placeholder='제목 또는 본문에서 검색', key='community_search', max_chars=80)
-    marker=(category,term)
-    if st.session_state.get('community_last_filter') != marker:
-        st.session_state['community_last_filter'] = marker
-        st.session_state['community_page']=1
-    page=int(st.session_state.get('community_page',1))
+def verify_password(password: str, encoded: str) -> bool:
     try:
-        posts,total=db.list_posts(category,term,page)
-    except Exception as exc:
-        _safe_error(exc)
+        algorithm, iterations, salt, digest = encoded.split('$')
+        if algorithm != 'pbkdf2_sha256':
+            return False
+        expected = base64.b64decode(digest, validate=True)
+        check = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'),
+                                    base64.b64decode(salt, validate=True), int(iterations))
+        return hmac.compare_digest(expected, check)
+    except (ValueError, TypeError):
+        return False
+
+
+def current_user():
+    return st.session_state.get('auth_user')
+
+
+def load_user_data(user):
+    """새 로그인 시 타인의 이전 세션 캐시를 제거하고 자신의 데이터를 읽습니다."""
+    from training import BASELINE
+    saved = store.load_diagnosis(user['user_id'])
+    for name in ('stage', 'answers', 'option_orders', 'editing_mode',
+                 'page', 'selected_id', 'category', 'messages', 'training_plan',
+                 'revealed_events', 'event_index', 'outputs', 'attempts',
+                 'attempt_no', 'draft_message', '_clear_draft_message',
+                 'baseline', 'diagnosis_baseline_is_real', 'saved_diagnosis_digest',
+                 'onboarding_owner', 'onboarding_answers', 'onboarding_step',
+                 'type_survey_just_completed'):
+        st.session_state.pop(name, None)
+    for key in list(st.session_state):
+        if key.startswith('survey_q_'):
+            st.session_state.pop(key, None)
+    if saved:
+        st.session_state['stage'] = 13
+        st.session_state['answers'] = saved['answers']
+        scores = saved['scores']
+        st.session_state['baseline'] = baseline_from_scores(scores)
+        st.session_state['diagnosis_baseline_is_real'] = True
+        st.session_state['saved_diagnosis_digest'] = digest_answers(saved['answers'])
+    else:
+        st.session_state['baseline'] = deepcopy(BASELINE)
+        st.session_state['diagnosis_baseline_is_real'] = False
+    st.session_state['attempts'] = store.load_trainings(user['user_id'])
+    st.session_state['page'] = 'library'
+
+
+def baseline_from_scores(scores):
+    from training import BASELINE
+    mapping = {
+        'agency': 'human_agency', 'responsibility': 'human_responsibility',
+        'ethics': 'ethical_view', 'safety': 'safe_use',
+        'ai_basics': 'ai_basic', 'utilization': 'ai_usage',
+    }
+    result = deepcopy(BASELINE)
+    for source, target in mapping.items():
+        if source in scores:
+            result[target] = round(min(2.0, max(0.0, float(scores[source]))) / 2 * 100)
+    return result
+
+
+def digest_answers(answers):
+    import json
+    return hashlib.sha256(json.dumps(answers, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def persist_diagnosis_if_complete():
+    user = current_user()
+    if not user or st.session_state.get('stage') != 13:
         return
-    st.caption(f'게시글 {total}개')
-    if not posts:
-        st.info('등록된 게시글이 없습니다. 첫 글을 작성해보세요.')
-    for post in posts:
-        with st.container(border=True):
-            cols=st.columns([4,1],vertical_alignment='center')
-            with cols[0]:
-                st.write(f"[{post['category']}] {post['title']}")
-                st.caption(f"{post['author']} · {post['created_at']} · 댓글 {post['comment_count']}개")
-            with cols[1]:
-                if st.button('읽기',key=f"community_open_{post['post_id']}",use_container_width=True):
-                    st.session_state['community_post_id']=post['post_id']
-                    st.session_state['community_mode']='read'
-                    st.rerun()
-    max_page=max(1,(total+db.PAGE_SIZE-1)//db.PAGE_SIZE)
-    if page>max_page:
-        st.session_state['community_page']=max_page
-        st.rerun()
-    c1,c2,c3=st.columns([1,2,1],vertical_alignment='center')
-    with c1:
-        if st.button('이전', disabled=page<=1, use_container_width=True):
-            st.session_state['community_page']=page-1
-            st.rerun()
-    with c2:
-        st.caption(f'{page} / {max_page} 페이지')
-    with c3:
-        if st.button('다음',disabled=page>=max_page,use_container_width=True):
-            st.session_state['community_page']=page+1
-            st.rerun()
+    import test
+    answers = st.session_state.get('answers', {})
+    if not test.diagnosis_complete():
+        return
+    digest = digest_answers(answers)
+    if st.session_state.get('saved_diagnosis_digest') == digest:
+        return
+    scores = test.calculate_scores()
+    store.save_diagnosis(user['user_id'], scores, answers)
+    st.session_state['saved_diagnosis_digest'] = digest
+    st.session_state['baseline'] = baseline_from_scores(scores)
+    st.session_state['diagnosis_baseline_is_real'] = True
 
 
-def _write_view(user_id):
-    if st.button('목록으로 돌아가기',key='community_back_write'):
-        st.session_state['community_mode']='list'
-        st.rerun()
-    st.subheader('글 작성')
-    with st.form('community_create_form', clear_on_submit=False):
-        category=st.selectbox('카테고리',db.CATEGORIES)
-        title=st.text_input('제목',max_chars=100)
-        content=st.text_area('내용',height=220,max_chars=5000)
-        submitted=st.form_submit_button('등록하기',type='primary')
-    if submitted:
+def sign_out():
+    # 사용자 전환 시 위젯/진단/훈련 캐시를 포함한 모든 세션 상태를 제거합니다.
+    st.session_state.clear()
+
+
+def _allowed_login_attempt():
+    log = [t for t in st.session_state.get('login_fail_times', []) if time.monotonic() - t < 60]
+    st.session_state['login_fail_times'] = log
+    return len(log) < 5
+
+
+def _login_attempt(username, password):
+    """Authenticate using the existing account store. Return an error or None."""
+    if not _allowed_login_attempt():
+        return '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.'
+    record = store.find_account(username.strip().lower())
+    # Constant-work dummy hash also for unknown usernames.
+    valid = verify_password(password, record['password_hash']) if record else verify_password(password, _DUMMY_HASH)
+    if not valid:
+        st.session_state.setdefault('login_fail_times', []).append(time.monotonic())
+        return '아이디 또는 비밀번호가 올바르지 않습니다.'
+    user = {k: record[k] for k in ('user_id', 'username', 'display_name')}
+    load_user_data(user)
+    st.session_state['auth_user'] = user
+    st.session_state['login_fail_times'] = []
+    return None
+
+
+def _signup_attempt(display_name, username, password, confirm):
+    """Register with existing onboarding_pending mechanism. Return (error, field)."""
+    if not display_name.strip() or len(display_name.strip()) > 40:
+        return '이름 또는 닉네임을 입력해주세요.', 'nickname'
+    if not _USER_RX.fullmatch(username):
+        return '아이디는 영문·숫자·밑줄·하이픈 3~24자로 입력해주세요.', 'userId'
+    if len(password) < 8 or len(password) > 128:
+        return '비밀번호는 8~128자로 입력해주세요.', 'password'
+    if password != confirm:
+        return '비밀번호 확인이 일치하지 않습니다.', 'passwordConfirm'
+    record = store.create_account(username.lower(), display_name.strip(), hash_password(password))
+    if record is None:
+        return '이미 사용 중인 아이디입니다.', 'userId'
+    load_user_data(record)
+    st.session_state['auth_user'] = record
+    return None
+
+
+# 고정 더미 계정을 조회하지 않더라도 해시 검증 시간을 비슷하게 맞춥니다.
+_DUMMY_HASH = hash_password('not-a-real-account')
+
+
+def render_auth(view, navigate):
+    """Show friend's unchanged login.html UI; bind it to existing account + LPA logic."""
+    from friend_pages import auth_fragment
+    user = current_user()
+    if user:
+        navigate('onboarding' if store.needs_onboarding(user['user_id']) else 'mypage')
+        return
+
+    # The HTML submits its values to a hidden *server-side* Streamlit form.
+    # Sensitive values are not written into HTML by this module.
+    st.html("""<style>
+      .st-key-auth_bridge {position:absolute!important;width:0!important;height:0!important;
+        overflow:hidden!important;opacity:0!important;pointer-events:none!important;}
+    </style>""")
+    with st.container(key='auth_bridge'):
+        with st.form('auth_bridge_form', clear_on_submit=True, border=False):
+            raw_payload = st.text_input('payload', key='auth_payload', max_chars=1000,
+                                        label_visibility='collapsed')
+            sent = st.form_submit_button('submit', key='auth_bridge_submit')
+
+    flash = None
+    if sent:
+        st.session_state['auth_render_no'] = st.session_state.get('auth_render_no', 0) + 1
         try:
-            post_id=db.create_post(user_id,category,title,content)
-        except Exception as exc:
-            _safe_error(exc)
-        else:
-            st.session_state['community_post_id']=post_id
-            st.session_state['community_mode']='read'
-            st.rerun()
-
-
-def _edit_view(post,user_id):
-    if st.button('글로 돌아가기',key='community_edit_back'):
-        st.session_state['community_mode']='read'
-        st.rerun()
-    st.subheader('글 수정')
-    with st.form('community_edit_form'):
-        category=st.selectbox('카테고리',db.CATEGORIES,index=db.CATEGORIES.index(post['category']))
-        title=st.text_input('제목',value=post['title'],max_chars=100)
-        content=st.text_area('내용',value=post['content'],height=220,max_chars=5000)
-        submitted=st.form_submit_button('수정 저장',type='primary')
-    if submitted:
-        try:
-            ok=db.update_post(post['post_id'],user_id,category,title,content)
-            if not ok:
-                st.error('작성자만 수정할 수 있습니다.')
+            payload = json.loads(raw_payload or '{}')
+        except (ValueError, TypeError):
+            payload = {}
+        if not isinstance(payload, dict):
+            payload = {}
+        mode = payload.get('mode') if payload.get('mode') in ('login','signup') else view
+        data = payload.get('data') if isinstance(payload.get('data'), dict) else {}
+        value = lambda k: str(data.get(k) or '')[:200]
+        username = value('userId').strip().lower()
+        if mode == 'login':
+            error = _login_attempt(username, value('password'))
+            if error is None:
+                destination = st.session_state.pop('post_login_view', 'mypage')
+                user = current_user()
+                navigate('onboarding' if store.needs_onboarding(user['user_id']) else destination)
                 return
-        except Exception as exc:
-            _safe_error(exc)
+            flash = {'msg':error,'userId':username,'field':'password'}
         else:
-            st.session_state['community_mode']='read'
-            st.rerun()
+            name = value('nickname')
+            issue = _signup_attempt(name, username, value('password'), value('passwordConfirm'))
+            if issue is None:
+                st.session_state.pop('post_login_view', None)
+                navigate('onboarding')  # preserve mandatory Q26 12-item LPA survey
+                return
+            flash = {'msg':issue[0],'field':issue[1],'userId':username,'nickname':name}
+        view = mode
 
+    st.html(auth_fragment(view, flash, st.session_state.get('auth_render_no', 0)),
+            unsafe_allow_javascript=True)
 
-def _read_view(user_id):
-    post_id=st.session_state.get('community_post_id')
-    if not post_id:
-        st.session_state['community_mode']='list'
-        st.rerun()
-    post=db.get_post(post_id)
-    if not post:
-        st.info('게시글을 찾을 수 없어요. 삭제되었을 수 있습니다.')
-        if st.button('목록 보기',key='community_not_found'):
-            st.session_state['community_mode']='list'
-            st.rerun()
-        return
-    if st.button('목록으로',key='community_back_read'):
-        st.session_state['community_mode']='list'
-        st.rerun()
-    with st.container(border=True):
-        st.caption(post['category'])
-        st.subheader(post['title'])
-        st.caption(f"작성자: {post['author']} · 작성: {post['created_at']}")
-        st.text(post['content'])
-        if user_id == post['user_id']:
-            col1,col2=st.columns(2)
-            with col1:
-                if st.button('글 수정',key='community_edit_post'):
-                    st.session_state['community_mode']='edit'
-                    st.rerun()
-            with col2:
-                confirm=st.checkbox('삭제 확인',key=f'community_delete_confirm_{post_id}')
-                if st.button('글 삭제',disabled=not confirm,key='community_delete_post'):
-                    if db.delete_post(post_id,user_id):
-                        st.session_state['community_mode']='list'
-                        st.session_state.pop('community_post_id',None)
-                        st.rerun()
-                    st.error('작성자만 삭제할 수 있습니다.')
-
-    st.subheader('댓글')
-    comments=db.list_comments(post_id)
-    st.caption(f'{len(comments)}개')
-    for comment in comments:
-        with st.container(border=True):
-            st.caption(f"{comment['author']} · {comment['created_at']}")
-            st.text(comment['content'])
-            if comment['user_id']==user_id:
-                if st.button('댓글 삭제',key=f"community_delete_comment_{comment['comment_id']}"):
-                    if db.delete_comment(comment['comment_id'],user_id):
-                        st.rerun()
-                    st.error('작성자만 댓글을 삭제할 수 있습니다.')
-    with st.form(f'community_comment_form_{post_id}',clear_on_submit=True):
-        text=st.text_area('댓글 작성',max_chars=500,height=100)
-        submitted=st.form_submit_button('댓글 등록')
-    if submitted:
-        try:
-            db.create_comment(post_id,user_id,text)
-        except Exception as exc:
-            _safe_error(exc)
-        else:
-            st.rerun()
-
-    if post['user_id'] != user_id:
-        with st.expander('게시글 신고'):
-            reason=st.selectbox('신고 사유', db.REPORT_REASONS)
-            if st.button('신고 접수',key=f'community_report_{post_id}'):
-                try:
-                    db.report_post(post_id,user_id,reason)
-                except Exception as exc:
-                    _safe_error(exc)
-                else:
-                    st.success('신고 내용이 저장되었습니다. 운영자 검토 기능은 별도 구축이 필요합니다.')
-
-
-def render(navigate):
-    user=auth.current_user()
-    if not user:
-        navigate('login')
-        return
-    try:
-        db.ensure_schema()
-    except Exception:
-        st.error('커뮤니티 데이터 저장소를 준비하지 못했습니다. DATABASE_URL과 권한을 확인해주세요.')
-        return
-    st.title('디딤돌 커뮤니티')
-    st.caption('AI 활용 질문, 학습 후기, 유용한 정보를 공유하는 공간입니다.')
-    st.info('실명·연락처·비밀번호·API 키·타인의 개인정보를 게시하지 마세요.')
-    mode=st.session_state.get('community_mode','list')
-    if mode=='write':
-        _write_view(user['user_id'])
-    elif mode=='read':
-        _read_view(user['user_id'])
-    elif mode=='edit':
-        post=db.get_post(st.session_state.get('community_post_id',''))
-        if post and post['user_id']==user['user_id']:
-            _edit_view(post,user['user_id'])
-        else:
-            st.error('작성자만 수정할 수 있습니다.')
-            st.session_state['community_mode']='list'
-    else:
-        _list_view(user['user_id'])
