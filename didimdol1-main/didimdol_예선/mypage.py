@@ -26,23 +26,23 @@ def _radar(profile: dict, before: dict | None = None):
         old = [int(before.get(key, 0)) for key in ABILITY_ORDER]
         figure.add_trace(go.Scatterpolar(
             r=old + [old[0]], theta=theta, name='사전진단',
-            fill='toself', line=dict(color='#9AABA1', width=2),
-            fillcolor='rgba(154,171,161,.12)'
+            fill='toself', line=dict(color='#B5B5B5', width=2),
+            fillcolor='rgba(181,181,181,.10)'
         ))
     now = [int(profile.get(key, 0)) for key in ABILITY_ORDER]
     figure.add_trace(go.Scatterpolar(
         r=now + [now[0]], theta=theta, name='현재 프로필',
-        fill='toself', line=dict(color='#25975A', width=3),
-        fillcolor='rgba(37,151,90,.16)'
+        fill='toself', line=dict(color='#338251', width=3),
+        fillcolor='rgba(78,189,120,.18)'
     ))
     figure.update_layout(
         height=365, margin=dict(l=45, r=45, b=20, t=40),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#3F5D4C', size=11),
+        font=dict(color='#555555', size=11),
         polar=dict(bgcolor='rgba(0,0,0,0)',
                    radialaxis=dict(visible=True, range=[0, 100], tickvals=[20,40,60,80,100],
-                                   tickfont=dict(size=9), gridcolor='#E0EDE3'),
-                   angularaxis=dict(gridcolor='#E0EDE3')),
+                                   tickfont=dict(size=9), gridcolor='#DEF2E5'),
+                   angularaxis=dict(gridcolor='#DEF2E5')),
         legend=dict(orientation='h', y=1.17, x=.02),
         showlegend=True,
     )
