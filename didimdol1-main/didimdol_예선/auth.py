@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import json
 import os
 import re
 import time
@@ -116,26 +117,39 @@ def _allowed_login_attempt():
     return len(log) < 5
 
 
-def _login_submit(username, password):
+def _login_attempt(username, password):
+    """Authenticate using the existing account store. Return an error or None."""
     if not _allowed_login_attempt():
-        st.error('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.')
-        return False
+        return '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.'
     record = store.find_account(username.strip().lower())
-    # 없는 계정도 동일한 KDF를 실행하여 계정 존재 여부의 타이밍 유출을 줄입니다.
-    if record is None:
-        verify_password(password, _DUMMY_HASH)
-        valid = False
-    else:
-        valid = verify_password(password, record['password_hash'])
+    # Constant-work dummy hash also for unknown usernames.
+    valid = verify_password(password, record['password_hash']) if record else verify_password(password, _DUMMY_HASH)
     if not valid:
         st.session_state.setdefault('login_fail_times', []).append(time.monotonic())
-        st.error('아이디 또는 비밀번호가 올바르지 않습니다.')
-        return False
+        return '아이디 또는 비밀번호가 올바르지 않습니다.'
     user = {k: record[k] for k in ('user_id', 'username', 'display_name')}
     load_user_data(user)
     st.session_state['auth_user'] = user
     st.session_state['login_fail_times'] = []
-    return True
+    return None
+
+
+def _signup_attempt(display_name, username, password, confirm):
+    """Register with existing onboarding_pending mechanism. Return (error, field)."""
+    if not display_name.strip() or len(display_name.strip()) > 40:
+        return '이름 또는 닉네임을 입력해주세요.', 'nickname'
+    if not _USER_RX.fullmatch(username):
+        return '아이디는 영문·숫자·밑줄·하이픈 3~24자로 입력해주세요.', 'userId'
+    if len(password) < 8 or len(password) > 128:
+        return '비밀번호는 8~128자로 입력해주세요.', 'password'
+    if password != confirm:
+        return '비밀번호 확인이 일치하지 않습니다.', 'passwordConfirm'
+    record = store.create_account(username.lower(), display_name.strip(), hash_password(password))
+    if record is None:
+        return '이미 사용 중인 아이디입니다.', 'userId'
+    load_user_data(record)
+    st.session_state['auth_user'] = record
+    return None
 
 
 # 고정 더미 계정을 조회하지 않더라도 해시 검증 시간을 비슷하게 맞춥니다.
@@ -143,152 +157,55 @@ _DUMMY_HASH = hash_password('not-a-real-account')
 
 
 def render_auth(view, navigate):
-    st.html('''<style>
-      [data-testid="stMainBlockContainer"]{max-width:1060px!important;padding-top:38px!important;}
-      .auth-intro{text-align:center;padding:18px 0 24px;}
-      .auth-eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;color:#238954;}
-      .auth-title{font-size:36px;font-weight:850;color:#1c3128;margin:6px 0;}
-      .auth-subtitle{font-size:15px;color:#64736a;}
-      .st-key-auth_card{max-width:460px;margin:0 auto;background:#fff;border:1px solid #e1ece3;
-        border-radius:24px;padding:28px 32px;box-shadow:0 8px 25px rgba(22,83,48,.06);}
-      .st-key-auth_card .stButton>button[kind="primary"]{background:#238954;border-color:#238954;color:white;}
-      .st-key-auth_card input{background:#fff!important;color:#203528!important;}
-
-      /* 로그인/회원가입: 텍스트와 배경의 명도 대비를 명시적으로 고정합니다. */
-      .st-key-auth_card {
-        color-scheme: light !important;
-        background: #ffffff !important;
-        color: #1b3026 !important;
-      }
-      .st-key-auth_card [data-testid="stWidgetLabel"] p,
-      .st-key-auth_card label p {
-        color: #22372b !important;
-        font-weight: 700 !important;
-      }
-      .st-key-auth_card [data-testid="stTextInput"] input,
-      .st-key-auth_card input[type="text"],
-      .st-key-auth_card input[type="password"] {
-        background-color: #ffffff !important;
-        color: #192d23 !important;
-        -webkit-text-fill-color: #192d23 !important;
-        border-radius: 11px !important;
-        caret-color: #176a40 !important;
-        box-shadow: none !important;
-      }
-      .st-key-auth_card [data-testid="stTextInput"] input::placeholder {
-        color: #69786f !important;
-        -webkit-text-fill-color: #69786f !important;
-        opacity: 1 !important;
-      }
-      .st-key-auth_card [data-testid="stTextInput"]:focus-within [data-baseweb="input"],
-      .st-key-auth_card [data-testid="stTextInput"]:focus-within input {
-        border-color: #238954 !important;
-      }
-      /* 눈 아이콘: 어두운 테마의 잔여 색상도 제거 */
-      .st-key-auth_card [data-testid="stTextInput"] button,
-      .st-key-auth_card [data-testid="stTextInput"] [data-baseweb="input"] {
-        background-color: #ffffff !important;
-        color: #314a3b !important;
-      }
-      .st-key-auth_card [data-testid="stTextInput"] button svg {
-        color: #314a3b !important;
-        stroke: #314a3b !important;
-      }
-      /* Streamlit 오류 알림: 옅은 분홍 배경에 진한 적색 텍스트 */
-      .st-key-auth_card [data-testid="stAlert"],
-      .st-key-auth_card [data-testid="stAlert"] [data-baseweb="notification"],
-      .st-key-auth_card [data-testid="stAlert"] [data-testid^="stAlertContent"],
-      [data-testid="stAlert"]:has([data-testid="stAlertContentError"]),
-      [data-testid="stAlertContentError"] {
-        background: #fff0f1 !important;
-        border-color: #e9a6ad !important;
-      }
-      .st-key-auth_card [data-testid="stAlert"] p,
-      .st-key-auth_card [data-testid="stAlert"] [data-testid="stMarkdownContainer"],
-      .st-key-auth_card [data-testid="stAlert"] [data-testid="stMarkdownContainer"] *,
-      [data-testid="stAlertContentError"] p,
-      [data-testid="stAlertContentError"] * {
-        color: #842536 !important;
-        -webkit-text-fill-color: #842536 !important;
-        font-weight: 650 !important;
-        opacity: 1 !important;
-      }
-      .st-key-auth_card [data-testid="stAlert"] svg,
-      [data-testid="stAlertContentError"] svg {
-        color: #a5283c !important;
-        fill: currentColor !important;
-      }
-      /* 비밀번호 안내 / DB 경고 안내: 연한 회색 대신 진한 녹색빛 회색 */
-      .st-key-auth_card [data-testid="stCaptionContainer"],
-      .st-key-auth_card [data-testid="stCaptionContainer"] p,
-      .st-key-auth_card [data-testid="stCaptionContainer"] span {
-        color: #465b50 !important;
-        -webkit-text-fill-color: #465b50 !important;
-        font-size: 13px !important;
-        font-weight: 550 !important;
-        line-height: 1.65 !important;
-        opacity: 1 !important;
-      }
-      .st-key-auth_card [data-testid="stFormSubmitButton"] button[kind="primary"] {
-        background: #237748 !important;
-        border-color: #237748 !important;
-        color: #ffffff !important;
-        font-weight: 750 !important;
-      }
-      .st-key-auth_card [data-testid="stFormSubmitButton"] button[kind="primary"] *,
-      .st-key-auth_card [data-testid="stFormSubmitButton"] button[kind="primary"] p {
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
-      }
-      </style><div class="auth-intro"><div class="auth-eyebrow">DIDIMDOL · ACCOUNT</div>
-      <div class="auth-title">디딤돌</div><div class="auth-subtitle">나의 AI 역량 성장 기록을 안전하게 관리하세요.</div></div>''')
-    if current_user():
-        navigate('mypage')
+    """Show friend's unchanged login.html UI; bind it to existing account + LPA logic."""
+    from friend_pages import auth_fragment
+    user = current_user()
+    if user:
+        navigate('onboarding' if store.needs_onboarding(user['user_id']) else 'mypage')
         return
-    with st.container(key='auth_card'):
-        t1,t2 = st.columns(2)
-        if t1.button('로그인', key='auth_tab_login', type='primary' if view == 'login' else 'secondary',use_container_width=True):
-            navigate('login')
-        if t2.button('회원가입', key='auth_tab_signup', type='primary' if view == 'signup' else 'secondary',use_container_width=True):
-            navigate('signup')
-        st.write('')
-        if view == 'login':
-            st.markdown('### 다시 만나서 반가워요!')
-            with st.form('login_form', clear_on_submit=False):
-                username = st.text_input('아이디', placeholder='아이디를 입력하세요', max_chars=24)
-                password = st.text_input('비밀번호', type='password', placeholder='비밀번호를 입력하세요')
-                submit = st.form_submit_button('로그인', type='primary', use_container_width=True)
-            if submit and _login_submit(username, password):
-                dest = st.session_state.pop('post_login_view', 'mypage')
-                navigate(dest)
-            st.caption('비밀번호 찾기·이메일 인증은 아직 지원하지 않습니다. 계정을 잊어버리지 않도록 보관해주세요.')
-        else:
-            st.markdown('### 디딤돌 시작하기')
-            with st.form('signup_form', clear_on_submit=False):
-                display_name = st.text_input('이름 또는 닉네임',max_chars=40,placeholder='표시할 이름을 입력하세요')
-                username = st.text_input('아이디',max_chars=24,placeholder='영문·숫자·_·- (3~24자)')
-                password = st.text_input('비밀번호',type='password',placeholder='8자 이상',max_chars=128)
-                confirm = st.text_input('비밀번호 확인',type='password',max_chars=128)
-                submit = st.form_submit_button('회원가입 완료',type='primary',use_container_width=True)
-            if submit:
-                if not display_name.strip() or len(display_name.strip()) > 40:
-                    st.error('이름 또는 닉네임을 입력해주세요.')
-                elif not _USER_RX.fullmatch(username):
-                    st.error('아이디는 영문·숫자·밑줄·하이픈 3~24자로 입력해주세요.')
-                elif len(password) < 8:
-                    st.error('비밀번호는 8자 이상 입력해주세요.')
-                elif password != confirm:
-                    st.error('비밀번호 확인이 일치하지 않습니다.')
-                else:
-                    record = store.create_account(username.lower(), display_name.strip(), hash_password(password))
-                    if record is None:
-                        st.error('이미 사용 중인 아이디입니다.')
-                    else:
-                        load_user_data(record)
-                        st.session_state['auth_user'] = record
-                        # 새 계정은 유형 설문을 마친 후 마이페이지로 이동합니다.
-                        st.session_state.pop('post_login_view', None)
-                        navigate('onboarding')
-        if not store.is_hosted_database():
-            st.caption('현재 로컬 SQLite 저장소를 사용합니다. Streamlit Cloud 배포 전 DATABASE_URL 설정이 필요합니다.')
 
+    # The HTML submits its values to a hidden *server-side* Streamlit form.
+    # Sensitive values are not written into HTML by this module.
+    st.html("""<style>
+      .st-key-auth_bridge {position:absolute!important;width:0!important;height:0!important;
+        overflow:hidden!important;opacity:0!important;pointer-events:none!important;}
+    </style>""")
+    with st.container(key='auth_bridge'):
+        with st.form('auth_bridge_form', clear_on_submit=True, border=False):
+            raw_payload = st.text_input('payload', key='auth_payload', max_chars=1000,
+                                        label_visibility='collapsed')
+            sent = st.form_submit_button('submit', key='auth_bridge_submit')
+
+    flash = None
+    if sent:
+        st.session_state['auth_render_no'] = st.session_state.get('auth_render_no', 0) + 1
+        try:
+            payload = json.loads(raw_payload or '{}')
+        except (ValueError, TypeError):
+            payload = {}
+        if not isinstance(payload, dict):
+            payload = {}
+        mode = payload.get('mode') if payload.get('mode') in ('login','signup') else view
+        data = payload.get('data') if isinstance(payload.get('data'), dict) else {}
+        value = lambda k: str(data.get(k) or '')[:200]
+        username = value('userId').strip().lower()
+        if mode == 'login':
+            error = _login_attempt(username, value('password'))
+            if error is None:
+                destination = st.session_state.pop('post_login_view', 'mypage')
+                user = current_user()
+                navigate('onboarding' if store.needs_onboarding(user['user_id']) else destination)
+                return
+            flash = {'msg':error,'userId':username,'field':'password'}
+        else:
+            name = value('nickname')
+            issue = _signup_attempt(name, username, value('password'), value('passwordConfirm'))
+            if issue is None:
+                st.session_state.pop('post_login_view', None)
+                navigate('onboarding')  # preserve mandatory Q26 12-item LPA survey
+                return
+            flash = {'msg':issue[0],'field':issue[1],'userId':username,'nickname':name}
+        view = mode
+
+    st.html(auth_fragment(view, flash, st.session_state.get('auth_render_no', 0)),
+            unsafe_allow_javascript=True)
